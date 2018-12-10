@@ -144,31 +144,6 @@ function h_tmux()
     echo "====================================================="
 }
 
-function h_setup(){
-        cat<<-EOF
-        Command    Descreption
-        ---------- --------------------------------------------------------------------
-        ld         load image from /build/rrout/work/main<>/nvOS/usr/src( ld <1....3> )
-        loadl      load linux image ( loadl <work/main5/nvOS/usr/src> )
-        loads      load solaris image ( loads <work/main5/nvOS/usr/src>  )
-        ldwkspce   load image from /build/rrout/work/main/nvOS/usr/src
-        zo         go to zone/lxc (zo <lxc name> )
-        zlist      list zone/lxc s
-        zgo        go to zone/lxc
-        nv         nvOS services options ( nv s -status, nv sp -stop, nv r -restart )
-        mymnt      mount /build/rrout from $BUILD_MECHIENE
-        myumnt     unmount /build/rrout from $BUILD_MECHIENE
-        m-mnt      mount /build2 from $BUILD_MECHIENE
-        m-umnt     unmount /build2 from $BUILD_MECHIENE
-        nvosgdb    gdb --pid "'pidof nvOSd'"
-        h_tcpdump  help tcpdump
-        h_gdb      help gdb
-        h_dtrace   help dtrace
-        zpath      lxc rootfs path
-        mkenv      install gmake and hg
-        EOF
-}
-
 function h_tcpdump()
 {
         cat<<-EOF
@@ -215,7 +190,7 @@ function h_gdb(){
         -----------------
         Run gdb nvOS fron begin:
         #gdb /usr/sbin/nvOSd
-        #(gdb) run -l /var/nvOS/log/nvOSd.log -d 2
+        #(gdb) run -l /var/OS/log/OSd.log -d 2
         --- "-b" detaches it and runs it in the background hence exclude -b
         ------------------
 
@@ -254,25 +229,21 @@ function h_gtags(){
         ---------- --------------------------------------------------------------------
         <C-|>      Go to Defination
         <C-R>      Lookup Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
-        <C-X><C-X> Search Parten Reference
+        <C-E>      Go to Defination in left hand
+        <C-S>      Local symbol reference
+        <C-G>      Gtags raw string search [STRING-PATTERN]
+        <C-D>      Open Navigation Path
+        <C-T>      Return to previous tag
+        <C-X><C-X> Open reference          [X-PARTEEN]
+        <C-F><C-F> kg search               [K-PATTERN]
+        <C-Y><C-Y> Ack search              [ACK-PATTREN]
+        <C-LMouse> Mouse open Defination
+        <C-R><C-R> Open Reference          [R-PATTERN}
+        <C-G><C-G> Gtags grep search       [G-PARTTEN]
+        <C-P><C-P> Open File Path
+        <C-S><C-S> Searc sub string        [SUB-PATTERN]
+        <C-F><C-R> Gtags search and replace
+        <C-F><C-L> Gtags view cursor file
         <C-X><C-X> Search Parten Reference
         EOF
 }
