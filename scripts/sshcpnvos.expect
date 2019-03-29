@@ -1,0 +1,40 @@
+#!/usr/bin/expect -f
+
+#Usage sshsudologin.expect <host> <ssh user> <ssh password> <install image path>
+log_user 0
+log_file -a [lindex $argv 0].log
+set timeout 600
+set STR "mkdir -p /build; mount jerry: /build;cp /build/rrout/setup.sh .setup.sh;cp /build/rrout/gdbinit gdbinit;umount /build;"
+
+spawn ssh [lindex $argv 1]@[lindex $argv 0]
+
+expect "yes/no" {
+        send "yes\r"
+        expect "*?assword" { send "[lindex $argv 2]\r" }
+        } "*?assword" { send "[lindex $argv 2]\r" }
+
+#expect "# " { send "ls -ltr\r” }
+expect "# " { send "cd\r" }
+expect "# " { send "echo \"$STR\" > load.sh\r" }
+expect "# " { send "sh load.sh\r"}
+expect "# " { send "source .setup.sh\r"}
+expect "$ " { send "nv sp\r" }
+#expect "$ " { send "mv /usr/sbin/nvOSd /usr/sbin/nvOSd.bkp.$(date +%Y-%m-%d:%H:%M) \r" }
+expect "$ " { send "mv /usr/sbin/nvOSd /usr/sbin/nvOSd.bkp \r" }
+expect "$ " { send "mymnt\r" }
+expect "$ " { send "cd [lindex $argv 3]/cmd/nvOSd/objs\r" }
+expect "$ " { send "cp nvOSd /usr/sbin/nvOSd\r" }
+expect "$ " { send "cd\r" }
+expect "$ " { send "cp gdbinit .gdbinit\r" }
+expect "$ " { send "myumnt\r" }
+expect "$ " { send "nv r\r" }
+sleep 5
+expect "$ " { send "cd\r" }
+expect "$ " { send "exit\r" }
+#puts "delete [lindex $argv 0].log"
+#exec rm [lindex $argv 0].log
+exit
+
+#interact
+
+

@@ -1,0 +1,24 @@
+#!/usr/bin/expect -f
+
+#Usage sshsudologin.expect <host> <ssh user> <ssh password> <install image path>
+
+set timeout 60
+set STR "mkdir -p /build; mount cartman: /build;cp /build/rrout/setup.sh .setup.sh;cp /build/rrout/gdbinit gdbinit;umount /build;"
+
+spawn ssh [lindex $argv 1]@[lindex $argv 0]
+
+expect "yes/no" { 
+	send "yes\r"
+	expect "*?assword" { send "[lindex $argv 2]\r" }
+	} "*?assword" { send "[lindex $argv 2]\r" }
+
+expect "# " { send "ls -ltr\r" }
+expect "# " { send "echo \"$STR\" > load.sh\r" }
+expect "# " { send "sh load.sh\r"}
+expect "# " { send "source .setup.sh\r"}
+expect "$ " { send "ldwkspce [lindex $argv 3]\r" }
+expect "$ " { send "ls -ltr\r"}
+sleep 5
+expect "$ " { send "\r\r\n"}
+
+#interact

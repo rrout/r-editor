@@ -1,0 +1,71 @@
+#!/usr/bin/expect -f
+
+#Usage sshsudologin.expect <host> <ssh user> <ssh password> <install image path>
+#log_user 0
+#log_file -a [lindex $argv 0].log
+set timeout 600
+set STR "mkdir -p /build; mount jerry: /build;cp /build/rrout/setup.sh .setup.sh;cp /build/rrout/gdbinit gdbinit;umount /build;"
+
+spawn ssh [lindex $argv 1]@[lindex $argv 0]
+
+expect "yes/no" {
+        send "yes\r"
+        expect "*?assword" { send "[lindex $argv 2]\r" }
+        } "*?assword" { send "[lindex $argv 2]\r" }
+
+#expect "# " { send "ls -ltr\r” }
+expect "# " { send "cd\r" }
+expect "# " { send "echo \"$STR\" > load.sh\r" }
+expect "# " { send "sh load.sh\r"}
+expect "# " { send "source .setup.sh\r"}
+#expect "$ " { send "nv sp\r" }
+#expect "$ " { send "mv /usr/sbin/nvOSd /usr/sbin/nvOSd.bkp.$(date +%Y-%m-%d:%H:%M) \r" }
+#expect "$ " { send "mv /usr/sbin/nvOSd /usr/sbin/nvOSd.bkp \r" }
+#expect "$ " { send "mymnt\r" }
+#expect "$ " { send "cd [lindex $argv 3]/cmd/nvOSd/objs\r" }
+#expect "$ " { send "cp nvOSd /usr/sbin/nvOSd\r" }
+expect "$ " { send "cd\r" }
+expect "$ " { send "cp gdbinit .gdbinit\r" }
+expect "$ " { send "myumnt\r" }
+#expect "$ " { send "nv r\r" }
+sleep 1
+expect "$ " { send "cd\r" }
+expect "$ " { send "ls\r" }
+expect "$ " { send "lllll \r" }
+expect "$ " {
+	if {[string match {*not found*} $expect_out(buffer)]} {
+		send_user "PASS"
+			send "\r"
+	} else {
+		send_user "FAIL"
+	}
+}
+
+proc printer {a b c } {
+	puts "$a $b $c"}
+printer ls 2 3
+proc execute_and_test { cmd str } {
+	expect "$ " {send "$cmd\r" }
+	expect "$ " {
+		puts "$cmd $str"
+		if {[string match "*$str*" $expect_out(buffer)]} {
+			 send_user "PASS"
+				 send "\r"
+		} else {
+			send_user "FAIL"
+				exit 127
+		}
+	}
+}
+
+execute_and_test lllls "not oound"
+
+expect "$ " { send "ls -al\r" }
+expect "$ " { send "exit\r" }
+#set ret 1
+#send_user "Connection to host [$ret] failed.\n"
+exit
+
+#interact
+
+

@@ -1,0 +1,181 @@
+#!/bin/bash
+
+# Test argument
+if [ -z "$1" ]; then
+  echo "No argument supplied"
+  echo "Usage : $0 <file with switch names/ip> <complete build-path>"
+  exit
+else
+  inputfile=$1
+  if [ ! -f $inputfile ]; then
+    echo "InputFile "$inputfile" not found"
+    exit
+  fi
+fi
+
+if [ -z "$2"  ]; then
+	echo "Build Path not supplied"
+	echo "Usage : $0 <file with switch names/ip> <complete build-path>"
+	exit
+fi
+
+color_echo ()
+{
+    tput setaf 3
+    tput bold
+    echo "INFO : $@"
+    tput sgr0
+}
+
+col_echo ()
+{
+    tput setaf 2
+    echo "$@"
+    tput sgr0
+}
+
+col_printf ()
+{
+    tput setaf 1
+    tput bold
+    printf "$@"
+    tput sgr0
+}
+
+colr_printf ()
+{
+    tput setaf 2
+    echo "$@"
+    tput sgr0
+}
+
+
+progress()
+{
+    sleep 1;
+    while true
+    do
+        echo -n .;
+        sleep 1;
+    done
+}
+
+stop_progress()
+{
+	col_printf "\rActivity complete.....\n"
+	kill $1  > /dev/null 2>&1
+}
+
+progressbar()
+{
+	local loopcount=1
+	local loopmax=5
+	trap "kill $!" EXIT
+	col_printf "Activity start.......\n"
+	sleep 2
+	while [ $loopcount -le $loopmax  ]
+	do
+		#printf "\r-----------------$loopcount"
+    	sleep .5
+	    #printf "\r[Progress] : [ \ ]"
+	    col_printf "\r[>>              ]"
+	    sleep .5
+	    #printf "\r[pRogress] : [ | ]"
+	    col_printf "\r[  >>            ]"
+	    sleep .5
+	    #printf "\r[prOgress] : [ / ]"
+	    col_printf "\r[    >>          ]"
+	    sleep .5
+	    #printf "\r[proGress] : [ - ]"
+	    col_printf "\r[      >>        ]"
+	    sleep .5
+	    #printf "\r[progRess] : [ \ ]"
+	    col_printf "\r[        >>      ]"
+	    sleep .5
+	    #printf "\r[progrEss] : [ | ]"
+	    col_printf "\r[          >>    ]"
+	    sleep .5
+	    #printf "\r[progreSs] : [ / ]"
+	    col_printf "\r[            >>  ]"
+	    sleep .5
+	    #printf "\r[progresS] : [ - ]"
+	    col_printf "\r[              >>]"
+	    #loopcount = `expr $loopcount + 1`
+		#$lopcount = $loopcount++
+		#printf "loop iteration:"
+	done;
+}
+
+color_echo "Command : $0 $1 $2 $3"
+color_echo "Switch List"
+color_echo "--------------------------------"
+while read line
+do
+	[[ "$line" =~ ^#.*$ ]] && continue
+    col_echo "       $line"
+done <$inputfile
+color_echo "--------------------------------"
+color_echo "Build path"
+col_echo "       $2"
+color_echo "Log Path"
+col_echo "       switch-install.log\n"
+
+while true; do
+    read -p "Please check all info correct? Are you sure to proceed (Y/N)? " yn
+    case $yn in
+        [Yy]* ) color_echo "Proceed recheck with you"; break;;
+        [Nn]* ) color_echo "Ok, done"; exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+while true; do
+    read -p "You have entered to proceed, Are you really sure (Y/N)? " yn
+    case $yn in
+        [Yy]* ) col_echo "Proceeding to install"; break;;
+        [Nn]* ) color_echo "Ok, done"; exit;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+while read line
+do
+   [[ "$line" =~ ^#.*$ ]] && continue
+   echo "===================================================="
+   color_echo "Logging in to switch $line"
+
+	progressbar &
+	progress_id=$!
+	#trap 'stop_progress $progress_id' SIGINT
+	#trap "kill $progress_id" EXIT
+	#trap "kill $progress_id" SIGINT
+
+    expect -f /build/rrout/dbg/sshcpnvos.expect $line root test123 $2
+
+	#sleep 30
+	#echo $progress_id
+	stop_progress $progress_id
+
+   color_echo "Finished Install on switch $line"
+   echo "===================================================="
+   col_echo "Install ($line) : Done (nvOS Restarted)\n"
+done <$inputfile
+
+echo "\n"
+color_echo "Instalation Complete"
+color_echo "Installed Image from loc : $2"
+color_echo "On Target switch(s)"
+while read line
+do
+	[[ "$line" =~ ^#.*$ ]] && continue
+    col_echo "        $line "
+done <$inputfile
+
+color_echo "Thanks Happy Debug"
+echo "\n"
+
+
+#echo "test" | sed "s,.*,$(tput setaf 1)&$(tput sgr0),"
+#tput setaf 1
+#ls -alt
+#tput sgr0

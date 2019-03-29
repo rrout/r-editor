@@ -1,0 +1,68 @@
+#!/usr/bin/expect -f
+
+#Usage sshsudologin.expect <host> <ssh user> <ssh password> <install image path>
+log_user 0
+log_file -a [lindex $argv 0].log
+set timeout 600
+set STR "mkdir -p /build; mount jerry: /build;cp /build/rrout/setup.sh .setup.sh;cp /build/rrout/gdbinit gdbinit;umount /build;"
+
+proc execute_and_test { cmd errstr } {
+    expect "$ " {send "$cmd\r" }
+    expect "$ " {
+		#send_user "\r$cmd $errstr"
+		send_log "$cmd $errstr"
+        if {[string match "*$errstr*" $expect_out(buffer)]} {
+			#send_user "\r : Filed"
+			send_log ": Filed"
+			exit 127
+        } else {
+			#send_user "\r : Passed"
+			send_log ": Passed"
+            send "\r"
+        }
+    }
+}
+
+proc check_set_env { cmd str } {
+	expect "$ " {send "$cmd\r" }
+	expect "$ " {
+		if {[string match "*$str*" $expect_out(buffer)]} {
+			send_user "\r : Env is not proper !Installing Env!"
+			send "mkenv\r"
+		} else {
+			send_user "\r : Env is proper"
+			send "\r"
+		}
+	}
+}
+
+spawn ssh [lindex $argv 1]@[lindex $argv 0]
+
+expect "yes/no" {
+        send "yes\r"
+        expect "*?assword" { send "[lindex $argv 2]\r" }
+        } "*?assword" { send "[lindex $argv 2]\r" }
+
+expect "# " { send "cd\r" }
+expect "# " { send "echo \"$STR\" > load.sh\r" }
+expect "# " { send "sh load.sh\r"}
+expect "# " { send "source .setup.sh\r"}
+check_set_env gmake "command not found"
+
+#install now
+#expect "$ " { send "ldwkspce [lindex $argv 3]\r" }
+execute_and_test "ldwkspce [lindex $argv 3]" "ERROR"
+
+#Done exit now
+expect "$ " { send "exit\r" }
+
+send_user "\rAppending log file [lindex $argv 0].log >> switch-install.log"
+exec cat [lindex $argv 0].log >> switch-install.log
+send_user "\rDeleting log file [lindex $argv 0].log"
+exec rm [lindex $argv 0].log
+
+exit
+
+#interact
+
+
