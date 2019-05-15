@@ -67,8 +67,11 @@ set breakpoint pending on
 #https://thispointer.com/debugging-multi-threading-applications-with-gdb-debugger/
 
 #https://caiorss.github.io/C-Cpp-Notes/
+#https://caiorss.github.io/C-Cpp-Notes/Cpp-C-Debuggers.html
+#http://www.haifux.org/lectures/222/GDB_haifux_David_Khosid.pdf
 
 source ~/gdbinit-cpp-butify.gdb
+source ~/gdbinit-tips.gdb
 
 
 
