@@ -1,11 +1,11 @@
-i# _________________user tips_________________
+# _________________user tips_________________
 # The 'tips' command is used to provide tutorial-like info to the user
 define tips
   printf "GDB Tips Commands:\n"
-  printf "\tips-basic   : Breakpoint Tips\n"
-  printf "\tips-tui     : File and type Tips\n"
-  printf "\tips-c++-stl : C++ user utility tips\n"
-  printf "\tips-user    : AT&T vs Intel syntax\n"
+  printf "tips-basic   : Breakpoint Tips\n"
+  printf "tips-tui     : File and type Tips\n"
+  printf "tips-c-stl   : C++ user utility tips\n"
+  printf "tips-user    : AT&T vs Intel syntax\n"
 end
 document tips
     Provide a list of tips from users on various topics.
@@ -95,7 +95,7 @@ define tips-basic
 
     printf "Backtrace                         : Debug exceptions and signals such as segmentation fault\n"
     printf "backtrace or bt	Show backtrace\n"
-    printf "backtrace full or bt full         : Show full backtrace\n"i
+    printf "backtrace full or bt full         : Show full backtrace\n"
     printf "disas <printHello>                :Disassembly some function\n"
     printf "shell <uname -r>                  :Execute shell command\n"
 
@@ -142,7 +142,7 @@ define tips-extended
     printf "ptype [var]	:Print type info of the given variable\n"
 end
 
-define tips-c++-stl
+define tips-c-stl
     printf "C++ Print Beautifully\n==============================================\n"
     printf "         sourse gdbinit-cpp-butify.gdb before hand\n"
     printf "         ptype [var]  :Print type info of the given variable\n"
@@ -159,7 +159,7 @@ define tips-c++-stl
     printf "std::priority_queue<T>           : ppqueue\n"
 end
 
-document tips-c++-stl
+document tips-c-stl
     Tips for C++ STL Debugging
 end
 
@@ -174,6 +174,9 @@ define tips-tui
 end
 document tips-tui
 Tips for TUI Debugging
+end
+
+define rashmi
 end
 
 document rashmi
