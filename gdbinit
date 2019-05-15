@@ -6,12 +6,19 @@ echo \n\033[33m--------Customized    feel--------\033[0m\n\n
 #set non-stop on
 #prevent thread event print
 set print thread-events off
+echo  \n\033[33m % [set print thread-events off]\033[0m
 
 #Ignore SIGPIPE
 handle SIGPIPE nostop
+echo  \n\033[33m % [handle SIGPIPE nostop]\033[0m
 
 # list command outout size  - Number of source lines gdb will list by default is 10.
 set listsize 11
+
+# By default, it only loads ~/.gdbinit. add "safe-path" will then allow you to create a .gdbinit file in each of your  build directories with behavior that makes sense for that build directory
+set auto-load safe-path .
+echo  \n\033[33m % [iset auto-load safe-path .].\033[0m
+echo  \n\033[33m % INFO: gdbinit now refers to a version in the directory that GDB or a GDB Front End is ran from and not ~/.gdbinit\033[0m
 
 
 # __________________gdb options_________________
@@ -52,7 +59,7 @@ set $SHOWDATAWIN = 0
 
 #https://sourceware.org/gdb/onlinedocs/gdb/Set-Breaks.html
 set breakpoint pending on
-
+echo  \n\033[33m % [set breakpoint pending on]\033[0m
 # __________________end gdb options_________________
 
 
@@ -69,9 +76,32 @@ set breakpoint pending on
 #https://caiorss.github.io/C-Cpp-Notes/
 #https://caiorss.github.io/C-Cpp-Notes/Cpp-C-Debuggers.html
 #http://www.haifux.org/lectures/222/GDB_haifux_David_Khosid.pdf
-
+#https://github.com/dholm/dotgdb
+#https://gist.githubusercontent.com/rrout/7cbe2e1aa090e566c87d3f2e327ffe03/raw/1ac839c7d82dcefe0ec8adb764609a162b61044a/.gdbinit
+#https://sourceware.org/gdb/onlinedocs/gdb/Core-File-Generation.html#Core-File-Generation
+#
 source ~/gdbinit-cpp-butify.gdb
+echo  \n\033[33m % [source ~/gdbinit-cpp-butify.gdb]\033[0m
 source ~/gdbinit-tips.gdb
+echo  \n\033[33m % [source ~/gdbinit-tips.gdb]\033[0m
+echo  \n\033[33m % []\033[0m
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+printf "\n"

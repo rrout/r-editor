@@ -148,7 +148,7 @@ define tips-c-stl
     printf "         ptype [var]  :Print type info of the given variable\n"
     printf "STL                              Command\n"
     printf "std::vector<T>                   : pvector\n"
-    printf "std::list<T> 	         		 : plist or plist_member\n"
+    printf "std::list<T>                     : plist or plist_member\n"
     printf "std::map<T,T>                    : pmap or pmap_member\n"
     printf "std::multimap<T,T>               : pmap or pmap_member\n"
     printf "std::set<T>                      : pset\n"
