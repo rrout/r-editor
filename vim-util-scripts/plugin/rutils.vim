@@ -165,6 +165,11 @@ endfun
 ":noremap <C-Z> :call AlignEqual()<CR>
 
 
+
+if !exists('cmd_insert_function_header')
+    let cmd_insert_function_header = '<leader><C-F><C-U>'
+endif
+
 :fun! Headers()
 
         let sline = line("'<")
@@ -240,6 +245,9 @@ endfun
 exec ":noremap " g:cmd_insert_function_header ." :call Headers()<CR>"
 
 
+if !exists(':cmd_align_equal')
+    let :cmd_align_equal = '<leader><C-F><C-E>'
+endif
 :fun! ExpAlign()
         let sline = line("'<")
         let eline = line("'>")
