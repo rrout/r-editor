@@ -300,7 +300,12 @@ endfunction
 
 
 
-
+if !exists('cmd_highlight_word')
+    let cmd_highlight_word = '<leader><C-@>'
+endif
+if !exists('cmd_highlight_word_alt')
+    let cmd_highlight_word_alt = '<leader><C-@>'
+endif
 
 let g:MatchGroup= [
         \{
@@ -388,6 +393,7 @@ function! Highlight_Match()
     endtry
 
 endfunction
+
 exec "noremap ". g:cmd_highlight_word ." :call Highlight_Match()<CR>"
 exec "noremap ". g:cmd_highlight_word_alt ." :call Highlight_Match()<CR>"
 exec "noremap <2-LeftMouse> :call Highlight_Match()<CR>"
