@@ -246,7 +246,7 @@ exec ":noremap " g:cmd_insert_function_header ." :call Headers()<CR>"
 
 
 if !exists('cmd_align_equal')
-    let :cmd_align_equal = '<leader><C-F><C-E>'
+    let cmd_align_equal = '<leader><C-F><C-E>'
 endif
 :fun! ExpAlign()
         let sline = line("'<")
