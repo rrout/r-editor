@@ -118,6 +118,14 @@ hi RowColColor ctermfg=231 ctermbg=94
 hi LocSepColor ctermfg=52 ctermbg=94
 hi LocColor ctermfg=255 ctermbg=52
 
+"Enable the statusline on demand
+if !exists('rutils_statusline_enable')
+    let rutils_statusline_enable = 0
+endif
+if g:rutils_statusline_enable == 0
+	finish
+endif
+
 if has('statusline')
   set statusline=%#ModeColor#                  " set highlighting
   set statusline+=\ %-8{GetMode()}            " set highlighting
