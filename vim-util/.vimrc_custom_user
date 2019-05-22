@@ -1,0 +1,90 @@
+execute pathogen#infect()
+"enable pathogen plugin manager
+execute pathogen#infect()
+"enable signify plugin for git and hg
+let g:signify_vcs_list = [ 'git', 'hg' ]
+"Toggle TagList
+nnoremap <F11> <ESC>:TlistToggle<CR>
+" Only works if you only diff with vimdiff (and not fugitive...)
+if &diff
+    "go to next diff
+    map <F9> ]c
+    "put the diff
+    map <F10> dp
+endif
+
+let g:gtags_cmd_open_ak_search      = '<C-Y><C-Y>'
+
+
+let g:akprg="/usr/bin/ack --column"
+let g:signify_vcs_list = [ 'git', 'hg' ]
+
+let g:Gtags_OpenQuickfixWindow = 1
+let g:Gtags_VerticalWindow = 0
+
+let g:No_Gtags_Multi_Window_Auto_Map = 0
+
+let g:rutils_statusline_enable = 0
+let g:quickr_cscope_keymaps = 0
+let g:quickr_cscope_use_qf_g = 1
+
+
+
+"https://groups.google.com/forum/#!topic/vim_use/DsvFjcV1DMk
+":noremap <CR> <CR><C-W><C-P>j 
+":noremap <CR> <CR><C-W><C-P>
+"https://vi.stackexchange.com/questions/19000/set-cursor-in-quickfix-on-autocmd-event
+"augroup quickfix
+"    autocmd!
+"    autocmd QuickFixCmdPost [^l]* nested cwindow
+"    autocmd QuickFixCmdPost    l* nested lwindow
+"augroup END
+"https://superuser.com/questions/815416/hitting-enter-in-the-quickfix-window-doesnt-work
+" In the quickfix window, <CR> is used to jump to the error under the
+" cursor, so undefine the mapping there.
+"autocmd BufReadPost quickfix nnoremap <buffer> <CR> <CR>
+
+"nmap <C-]> <plug>(quickr_cscope_global)
+"nmap <C-g>s <plug>(quickr_cscope_global_split)
+"nmap <C-g>v <plug>(quickr_cscope_global_vert_split)
+"nmap <C-e> <plug>(quickr_cscope_egrep)
+
+let g:airline_powerline_fonts=0
+"let g:airline_extensions = ['tabline', 'fugitiveline', 'tagbar']
+let g:airline_extensions = ['tabline', 'fugitiveline']
+"let g:airline_extensions = []
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline#extensions#tabline#formatter = 'default'
+let g:airline#extensions#fugitiveline#enabled = 1
+let g:airline#extensions#branch#enabled = 1
+let g:airline#extensions#hunks#enabled = 1
+"let g:airline_section_z = airline#section#create(['windowswap', '%3p%% ', 'linenr', ':%3v'])
+
+
+"https://github.com/kracejic/dotfiles/blob/master/.vimrc
+"https://www.reddit.com/r/vim/comments/5iz4cw/making_a_vim_setup_for_cc/
+let g:airline#extensions#default#section_truncate_width = {
+  \ 'b': 79,
+  \ 'x': 60,
+  \ 'y': 88,
+  \ 'z': 60,
+  \ 'warning': 80,
+  \ 'error': 80,
+  \ }
+let w:airline_skip_empty_sections = 1
+"let g:airline_section_b=' %{fugitive#head()}'
+let g:airline_section_x=' %{tagbar#currenttag("%s", "", "f")}'
+let g:airline#extensions#hunks#enabled = 0
+let g:airline#extensions#wordcount#enabled = 0
+let g:airline_section_z='☰ %l/%L:%c'
+let g:airline#extensions#branch#format = 2
+"let g:airline_section_x = airline#section#create(['tagbar'])
+let g:airline#extensions#tagbar#enabled = 0
+let g:airline#extensions#tagbar#flags = 'f'
+let g:airline_section_n = '%{hostname()}'
+"set laststatus=2
+"let g:airline_extensions = ['tabline', 'tagbar', 'fugitiveline']
+"au VimEnter * AirlineRefresh
+

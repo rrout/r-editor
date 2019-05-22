@@ -1,0 +1,757 @@
+"==================================================================
+"					GTAGS KEY BINDINGS
+"==================================================================
+let g:tagging_gtags = 1
+if g:tagging_gtags == 1
+
+let g:No_Gtags_Multi_Window_Auto_Map = 0
+let g:gtags_open_definition				= '<C-\>'		" Jump to definition of symbol
+let g:gtags_open_definition_left_hand	= '<C-E>'		"
+let g:gtags_open_definition_ctags_stype = '<C-]>'
+let g:gtags_open_reference				= '<C-R>'
+let g:gtags_open_local_sym_reference	= '<C-S>'
+let g:gtags_open_raw_string_search		= '<C-G>'
+let g:gtags_open_navigation_path		= '<C-D>'
+let g:gtags_close_tag					= '<C-T>'
+
+let g:gtags_cmd_open_kg_search		= '<C-F><C-F>'
+let g:gtags_cmd_open_ak_search      = '<C-Y><C-Y>'
+let g:gtags_cmd_open_definition		= '<C-X><C-X>'
+let g:gtags_mouse_open_definition	= '<C-LeftMouse>'
+let g:gtags_cmd_open_reference		= '<C-R><C-R>'
+let	g:gtags_cmd_open_grep_search	= '<C-G><C-G>'
+let	g:gtags_cmd_open_file_path		= '<C-P><C-P>'
+let	g:gtags_cmd_sub_string_search	= '<C-S><C-S>'
+let	g:gtags_cmd_search_and_replace	= '<C-F><C-R>'
+let	g:gtags_cmd_view_cursor_file	= '<C-F><C-L>'
+
+else
+
+set tags=./tags,tags;
+
+nmap <C-\> <plug>(quickr_cscope_global)
+"let g:cscope_open_definition              = '<C-\>'
+nmap <C-R> <plug>(quickr_cscope_symbols)
+"let g:cscope_open_reference               = '<C-R>'
+nmap <C-S> <plug>(quickr_cscope_callers)
+"let g:cscope_find_caller                  = '<C-S>'
+
+nmap <C-G> <plug>(quickr_cscope_pattern)
+"let g:cscope_cmd_open_reference           = '<C-G>'
+nmap <C-G><C-G> <plug>(quickr_cscope_iegrep_pattern)
+"let g:cscope_cmd_open_reference           = '<C-G>'
+
+endif
+
+"==================================================================
+"					VIMRC KEY BINDINGS
+
+"==================================================================
+let g:toggle_paste_mode 			= '<F4>'
+let g:insert_cfile_header_directive = '<C-F><C-H>'
+let g:cmd_full_find_replace			= '<C-J>'
+let g:cmd_line_find_replace			= '<C-K>'
+let g:cmd_select_find_replace		= '<C-L>'
+let g:cmd_highlight_word			= '<C-@>'
+let g:cmd_highlight_word_alt		= '<C-_>'
+
+let g:cmd_quit						= '<F2>'
+let g:cmd_save_file					= '<F1>'
+let g:cmd_update_gtags_file			= '<F3>'
+
+let g:cmd_clearcase_check_out		= '<F5>'
+let g:cmd_clearcase_check_in		= '<C-;>'
+"'<F6>'
+let g:cmd_clearcase_update			= '<F7>'
+let g:cmd_clearcase_undo_check_out	= '<F8>'
+
+let g:cmd_insert_function_header	= '<C-F><C-U>'
+let g:cmd_align_equal				= '<C-F><C-E>'
+
+let g:cmd_paste_cycle_next			= '<C-N>'
+let g:cmd_paste_cycle_previous		= '<C-P>'
+
+let g:cmd_load_current_word_find	= '<C-F>'
+let g:cmd_load_current_word_gtags	= '<C-D>'
+
+
+let g:cmd_add_comment				= '<C-C>'
+let g:cmd_remove_comment			= '<C-X>'
+
+"==================================================================
+"					VIM BINDINGS
+"==================================================================
+let g:vim_background_color_scheme	= 'klight'
+"let g:vim_background_color_scheme	= 'kdark'
+
+
+"==================================================================
+"					BASH KEY BINDINGS
+"==================================================================
+let g:cmd_dir_compare				= 'cmp'
+
+
+
+
+
+
+
+
+
+
+
+ "set autochdir
+ "let dir=system("pwd")
+ "let dir=substitute(dir, 'mucho.*', 'mucho/', "Ig")
+ ":cd "".dir
+:set path=.,~/utils/bin
+:set ts=8
+
+exe "set tags=".findfile('atags', ".;").",atags"
+exe "set tags+=". expand("%:p:h").'/tags,'. expand("%:p:h"). '/atags'
+exe "set tags+=". './atags'
+
+			" Tell vim to remember certain things when we exit
+			"  '10  :  marks will be remembered for up to 10 previously edited files
+			"  "100 :  will save up to 100 lines for each register
+			"  :20  :  up to 20 lines of command-line history will be remembered
+			"  %    :  saves and restores the buffer list
+			"  n... :  where to save the viminfo files
+:set viminfo='1000,\"10000,:200000,n~/.viminfo
+
+
+function! RestoreCursor()
+	if line("'\"") <= line("$")
+		normal! g`"
+		return 1
+	endif
+endfunction
+augroup restoreCursor
+	autocmd!
+	autocmd BufWinEnter * call RestoreCursor()
+augroup END
+
+
+"Highlighting can be enabled on Vim startup
+":set viminfo^=h
+"autocmd BufReadPost *  if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g\`\"" |  endif
+autocmd bufwritepost,filewritepost *.c  silent :call UpdateGtags()
+autocmd bufwritepost,filewritepost *.h  silent :call UpdateGtags()
+autocmd bufwritepost,filewritepost *.s  silent :call UpdateGtags()
+set ssop=blank,sesdir,folds,localoptions,tabpages,winpos,winsize
+
+
+:set laststatus=1
+:set scrolloff=2
+:set ic
+
+:iab p(" printf("
+:set nocompatible " explicitly get out of vi-compatible mode
+
+if &cp
+  finish
+endif
+
+
+
+:syntax on
+:map U <ESC>:redo<CR>
+
+":map <ESC>q  <ESC>:q!<CR>
+":set mouse=nv
+:set shiftwidth=4
+":set expandtab
+:set smartindent
+:set incsearch
+:set autoindent
+":colorscheme evening
+:set tabstop=4
+:set nowrap
+":set ruler
+"set rulerformat=%15(%c%V\ %p%%%)
+:set backspace=2
+:set hlsearch
+:set cindent
+":set paste
+
+:set ff=unix
+:set hidden
+:vnoremap <Tab> >gv
+:vnoremap <S-Tab> <gv
+":set matchpairs
+
+
+
+
+
+
+			":set nocp
+:filetype plugin on
+
+			":set fo=cql
+			":au FileType c,cpp,h setlocal comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,f://
+			":au FileType c,cpp,h setlocal comments-=://
+			"
+			""au FileType * setl fo-=cro
+
+
+"set completeopt=menu,preview,longest
+"set completeopt=menu
+"set completeopt-=menu
+set completeopt=menuone
+set completeopt+=menu
+set completeopt+=longest
+highlight PmenuSel cterm=none ctermbg=2
+":highlight PmenuSel ctermbg=2 ctermfg=Magenta cterm=NONE guibg=Green guifg=Green gui=none
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			":noremap <ESC><ESC>  <ESC><C-w><C-w><ESC>
+
+			"if has("cscope")
+			"    set cscopetag
+			"    set csto=0
+			"    set cst
+			"    set nocsverb
+			"
+			"    if filereadable("cscope.out")
+			"        cs add cscope.out
+			"    endif
+			"    if filereadable("../cscope.out")
+			"        cs add ../cscope.out
+			"    endif
+			"    if filereadable("../../cscope.out")
+			"        cs add ../../cscope.out
+			"    endif
+			"    set csverb
+			"
+			"    :nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+			"    :nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+			"    :nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+			"    :nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+			"    :nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+			"    :nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+			"    :nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+			"    :nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+			"
+			"endif
+			":noremap <F8> <ESC>:!cscope <CR>
+
+
+			" Basics {
+:set noexrc " don't use local version of .(g)vimrc, .exrc
+			":set background=dark " we plan to use a dark background
+:set cpoptions=aABceFsmq
+			"             |||||||||
+			"             ||||||||+-- When joining lines, leave the cursor
+			"             |||||||      between joined lines
+			"             |||||||+-- When a new match is created (showmatch)
+			"             ||||||      pause for .5
+			"             ||||||+-- Set buffer options when entering the
+			"             |||||      buffer
+			"             |||||+-- :write command updates current file name
+			"             ||||+-- Automatically add <CR> to the last line
+			"             |||      when using :@r
+			"             |||+-- Searching continues at the end of the match
+			"             ||      at the cursor position
+			"             ||+-- A backslash has no special meaning in mappings
+			"             |+-- :write updates alternative file name
+			"             +-- :read updates alternative file name
+			" }
+
+
+			" General {
+filetype plugin indent on " load filetype plugins/indent settings
+			"set autochdir " always switch to the current file directory
+:set backspace=indent,eol,start " make backspace a more flexible
+			"set backup " make backup files
+:set backupdir=~/.vim/backup " where to put backup files
+:set clipboard+=unnamed " share windows clipboard
+:set directory=~/.vim/tmp " directory to place swap files in
+			":set fileformats=unix,dos,mac " support all three, in this order
+:set hidden " you can change buffers without saving
+:set iskeyword+=_,$,@,%,# " none of these are word dividers
+			"set "mouse=a " use mouse everywhere
+set noerrorbells " don't make noise
+			"set whichwrap=b,s,h,l,<,>,~,[,] " everything wraps
+			"             | | | | | | | | |
+			"             | | | | | | | | +-- "]" Insert and Replace
+			"             | | | | | | | +-- "[" Insert and Replace
+			"             | | | | | | +-- "~" Normal
+			"             | | | | | +-- <Right> Normal and Visual
+			"             | | | | +-- <Left> Normal and Visual
+			"             | | | +-- "l" Normal and Visual (not recommended)
+			"             | | +-- "h" Normal and Visual (not recommended)
+			"             | +-- <Space> Normal and Visual
+			"             +-- <BS> Normal and Visual
+:set wildmenu " turn on command line completion wild style " ignore these list file extensions
+:set wildignore=*.dll,*.o,*.obj,*.bak,*.exe,*.pyc,*.jpg,*.gif,*.png
+:set wildmode=list:longest " turn on wild mode huge list
+			" }
+
+
+    set backspace=indent,eol,start " make backspace a more flexible
+    set backup " make backup files
+    set clipboard+=unnamed " share windows clipboard
+	set backupdir=~/.vim/backup " where to put backup files
+	set directory=~/.vim/tmp " directory to place swap files in
+    set fileformats=unix,dos,mac " support all three, in this order
+    set hidden " you can change buffers without saving
+			" (XXX: #VIM/tpope warns the line below could break things)
+    set iskeyword+=_,$,@,%,# " none of these are word dividers
+			"set mouse=a " use mouse everywhere
+
+    set noerrorbells " don't make noise
+			"set whichwrap=b,s,h,l,<,>,~,[,] " everything wraps
+			"             | | | | | | | | |
+			"             | | | | | | | | +-- "]" Insert and Replace
+			"             | | | | | | | +-- "[" Insert and Replace
+			"             | | | | | | +-- "~" Normal
+			"             | | | | | +-- <Right> Normal and Visual
+			"             | | | | +-- <Left> Normal and Visual
+			"             | | | +-- "l" Normal and Visual (not recommended)
+			"             | | +-- "h" Normal and Visual (not recommended)
+			"             | +-- <Space> Normal and Visual
+			"             +-- <BS> Normal and Visual
+    set wildmenu " turn on command line completion wild style
+    set wildignore=*.dll,*.o,*.obj,*.bak,*.exe,*.pyc,*.jpg,*.gif,*.png " ignore these list file extensions
+    set wildmode=list:longest " turn on wild mode huge list
+
+
+
+
+
+
+	set linespace=0 " don't insert any extra pixel lines betweens rows
+	set matchtime=1 " how many tenths of a second to blink matching brackets for
+	"set nohlsearch " do not highlight searched for phrases
+	set nostartofline " leave my cursor where it was
+	set novisualbell " don't blink
+			"set number " turn on line numbers
+			"set numberwidth=5 " We are good up to 99999 lines
+	set report=0 " tell us when anything is changed via :...
+	"set ruler " Always show current positions along the bottom
+	set scrolloff=2 " Keep 10 lines (top/bottom) for scope
+			"set shortmess=aOstT " shortens messages to avoid 'press a key' prompt
+	""set showcmd " show the command being typed
+	set showmatch " show matching brackets
+			"set sidescrolloff=10 " Keep 5 lines at the size
+
+			" hit f11 to paste
+			"set pastetoggle=<F4>
+			" space / shift-space scroll in normal mode
+	"set showbreak=>>\ \ \ \
+
+"-------------------------------
+
+			" Vim UI {
+			"set cursorcolumn " highlight the current column
+			"set cursorline " highlight current line
+"":set incsearch " BUT do highlight as you type you " search phrase
+"":set laststatus=2 " always show the status line
+			":set lazyredraw " do not redraw while running macros
+"":set linespace=0 " don't insert any extra pixel lines " betweens rows
+			"set list " we do what to show tabs, to ensure we get them  out of my files
+			"set listchars=tab:>-,trail:- " show tabs and trailing
+"":set matchtime=5 " how many tenths of a second to blink  matching brackets for
+"":set hlsearch " do not highlight searched for phrases
+"":set nostartofline " leave my cursor where it was
+""set novisualbell " don't blink
+			"set number " turn on line numbers
+			"set numberwidth=5 " We are good up to 99999 lines
+"":set report=0 " tell us when anything is changed via :...
+"":set ruler " Always show current positions along the bottom
+"":set scrolloff=2 " Keep 10 lines (top/bottom) for scope
+"":set shortmess=aOstT " shortens messages to avoid
+			" 'press a key' prompt
+			":set showcmd " show the command being typed
+"":set showmatch " show matching brackets
+"":set sidescrolloff=2 " Keep 5 lines at the size
+			":set statusline=%f%=%m%r%h%w[%4l/%4L][%3p%%][%3v]
+			"set statusline=%F%m%r%h%w[%L][%{&ff}]%y[%p%%][%04l,%04v]
+			"              | | | | |  |   |      |  |     |    |
+			"              | | | | |  |   |      |  |     |    + current
+			"              | | | | |  |   |      |  |     |       column
+			"              | | | | |  |   |      |  |     +-- current line
+			"              | | | | |  |   |      |  +-- current % into file
+			"              | | | | |  |   |      +-- current syntax in
+			"              | | | | |  |   |          square brackets
+			"              | | | | |  |   +-- current fileformat
+			"              | | | | |  +-- number of lines
+			"              | | | | +-- preview flag in square brackets
+			"              | | | +-- help flag in square brackets
+			"              | | +-- readonly flag in square brackets
+			"              | +-- rodified flag in square brackets
+			"              +-- full path to file in the buffer
+			" }
+
+			" Text Formatting/Layout {
+			"set expandtab " no real tabs please!
+""set history=9999 " big old history
+			"set formatoptions=rq " Automatically insert comment leader on return,
+			" and let gq format comments
+""set timeoutlen=300 " super low delay (works for me)
+			"set formatoptions+=n " Recognize numbered lists
+			"set formatlistpat=^\\s*\\(\\d\\\|[-*]\\)\\+[\\]:.)}\\t\ ]\\s* "and bullets, too
+
+			" set ignorecase " case insensitive by default
+			" set infercase " case inferred by default
+ set nowrap " do not wrap line
+			"set shiftround " when at 3 spaces, and I hit > ... go to 4, not 5
+			" set smartcase " if there are caps, go case-sensitive
+ set shiftwidth=4 " auto-indent amount when using cindent, " >>, << and stuff like that
+ set softtabstop=4 " when hitting tab or backspace, how many spaces "should a tab be (see expandtab)
+ set tabstop=4 " real tabs should be 8, and they will show with " set list on
+			" }
+			"ignore white space in vimdiff
+set diffopt+=iwhite
+
+
+":noremap ?  <ESC>:let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
+:noremap < <ESC><C-D>
+:noremap > <ESC><C-U>
+
+:inoremap , <ESC><C-D>
+:inoremap . <ESC><C-U>
+:noremap , <ESC><C-D>
+:noremap . <ESC><C-U>
+
+:noremap e <ESC>A
+:noremap b <ESC>I
+:inoremap e <ESC>A
+:inoremap b <ESC>I
+
+:noremap f <C-]>
+			":noremap n <C-]>
+:noremap t <C-T>
+:noremap r <C-T>
+:inoremap f <C-]>
+			":inoremap n <C-]>
+:inoremap r <C-T>
+:inoremap t <C-T>
+
+			":inoremap h <ESC>i
+			":inoremap l <ESC>lli
+			":noremap h <ESC>h
+			":noremap l <ESC>l
+
+"TODO delay in tomeout
+":inoremap j <ESC>ji
+":inoremap k <ESC>ki
+":noremap j <ESC>j
+":noremap k <ESC>k
+
+
+:noremap [B <ESC>j
+:noremap [A <ESC>k
+
+:inoremap [B <ESC>j
+:inoremap [A <ESC>k
+
+
+
+			":inoremap k  <ESC>:call IMoveUp()<CR>i
+			":inoremap j  <ESC>:call IMoveDown()<CR>i
+			"silent inoremap h <C-O>h
+			"silent inoremap j <C-O>j
+			"silent inoremap k <C-O>k
+			"silent inoremap l <C-O>l
+
+"Command mode map
+exec "cmap ". g:cmd_load_current_word_find ." <C-R><C-W>"
+exec "cmap ". g:cmd_load_current_word_gtags ." <C-R><C-W>"
+exec "cmap <C-S> <C-R><C-W>"
+exec "cmap <C-X> <C-R><C-W>"
+exec "cmap <C-R><C-R> <C-R><C-W>"
+
+
+:set noeb vb t_vb=
+
+
+":noremap   <ESC>:'<,'>!column -t<CR>
+":noremap!  <ESC>:'<,'>!column -t<CR>
+
+
+
+
+:set encoding=utf-8
+:set fileencodings=ucs-bom,utf-8
+
+
+
+
+			"Alt-Backspace = Delete a world
+:noremap  <BS> i<C-W>
+:inoremap <BS> i<C-W>
+":noremap   db
+":noremap   db
+":inoremap   <C-W>
+
+
+" CTL + h
+":inoremap   <C-W>
+":noremap   <C-W>
+":inoremap   <C-W>
+
+
+
+			"Alt + arrow = Foward/Backword word
+:noremap  f <esc>wi
+:inoremap f <esc>lwi
+:noremap  r <ESC>bi
+:inoremap r <ESC>bi
+
+			"Alt + arrow = Foward/Backword word
+:noremap  OC <esc>w
+:inoremap OC <esc>w
+:noremap  OD <esc>b
+:inoremap OD <esc>b
+
+
+			"Alt + arrow = Up/Down
+":noremap  OA <esc>-20<CR>
+":inoremap OA <esc>-20<CR>
+":noremap  OB <esc>+20<CR>
+":inoremap OB <esc>+20<CR>
+
+
+
+
+			" Alt + '+'
+:noremap  = <ESC>:set wrap <CR>
+:inoremap = <ESC>:set wrap <CR>
+:noremap  + <ESC>:set nowrap <CR>
+:inoremap + <ESC>:set nowrap <CR>
+
+
+
+" Color scheme
+"":set t_AB=[48;5;%dm
+":set t_AF=[38;5;%dm
+:set t_Co=256
+let g:CSApprox_attr_map = { 'bold' : 'bold', 'italic' : '', 'sp' : '' }
+
+
+exec "colorscheme  ".g:vim_background_color_scheme
+
+
+" restore screen after quitting
+    if has("terminfo")
+        let &t_Sf="\ESC[3%p1%dm"
+        let &t_Sb="\ESC[4%p1%dm"
+    else
+        let &t_Sf="\ESC[3%dm"
+        let &t_Sb="\ESC[4%dm"
+    endif
+			" Odds n Ends
+			"set ttymouse=xterm2 " makes it work in everything
+
+
+
+let Tlist_Ctags_Cmd='~/utils/bin/ctags'
+let g:ctags_path='~/utils/bin/ctags'
+let g:ctags_args='-I __declspec+'
+			""   (or whatever other additional arguments you want to pass to ctags)
+			"let g:ctags_statusline=2    " To show tag name in status line.
+let generate_tags=1 " To start automatically when a supported  file is opened.
+
+
+
+
+
+
+			" Cursor goes beyond last character
+set virtualedit=onemore,block
+hi folded guifg=red "wrap the cursor
+
+
+
+
+
+
+
+
+
+
+let tagmenuLoaded=1
+let g:menuname = "]Tags"
+
+
+
+
+
+set dictionary=~/.vim/dictionary
+set complete+=k
+
+if &term =~ "xterm"
+	let &t_SI = "\<Esc>]12;purple\x7"
+	let &t_EI = "\<Esc>]12;blue\x7"
+endif
+
+			":autocmd InsertEnter,InsertLeave * set cul
+			"let &t_SI="\<Esc>]50;CursorShape=1\x7"
+			"let &t_EI="\<Esc>]50;CursorShape=2\x7"
+			"
+if v:version > 700
+        autocmd InsertEnter * set nocul | set mouse=cnv
+        autocmd InsertLeave * set cul   | set mouse=in
+		autocmd VimEnter * set cul | set mouse=in
+		":set timeoutlen=200
+		set timeoutlen=300 ttimeoutlen=10
+endif
+
+
+set noerrorbells visualbell t_vb=
+if has('autocmd')
+	autocmd GUIEnter * set visualbell t_vb=
+endif
+set visualbell
+set noerrorbells
+
+
+let g:autoclose_on = 0
+set encoding=utf-8
+scriptencoding utf-8
+
+
+
+
+
+
+if !&diff
+	setl autoread
+endif
+
+			"au CursorHold * checktime
+if !&diff
+	au FocusGained,BufEnter,BufWinEnter,CursorHold,CursorMoved * :checktime
+	au FocusGained,BufEnter,BufWinEnter,CursorHold *.[ch] :call UpdateDeclaration()
+endif
+
+
+
+"colorscheme desert
+set guifont=Monospace\ 12
+
+			"Hightlight current char
+			"match ErrorMsg '\%#'
+
+"kg program
+let g:kgprg=$HOME."/utils/bin/kg --column"
+"ack search program - install ack
+let g:akprg="/usr/bin/ack --column"
+
+"DIFF options
+noremap do do]c
+noremap dp dp]c
+
+
+
+
+:noremap  wq <ESC>:wq<CR>
+
+"set swap(.swp),backup(.bak),undo(.udf)
+
+
+
+"let &t_SI .= "\<Esc>[?2004h"
+"let &t_EI .= "\<Esc>[?2004l"
+
+
+
+
+"TAB coloring
+silent hi SpecialKey guifg=black guibg=magenta cterm=bold ctermfg=231 ctermbg=255
+set list
+set listchars=tab:\ \
+set nolist
+
+
+
+
+
+
+
+"Keep the cursor on same colum when ESC is presed
+"inoremap <silent> <ESC> <C-O>:stopinsert<CR>
+
+"sets coluum and row
+"set lines=999 columns=999
+"exec "set lines=".winheight(0)." columns=".winwidth(0)
+
+
+			"noremap <Space> <PageDown>
+			"noremap  <PageUp>
+
+
+
+			"TODO:
+			"Header memnu
+			"search within line
+			"Popup menu
+			"Ctags function, syntax status
+			"pigment parser
+			"register copy/paste
+			"multiple search hightlight
+			"v file:22 separate linumber
+			"Header file search optimxation autocomplete
+			"Function prototype autocomplete
+			"Auto complete dont seletect first item
+			"shortcut keys in .vimrc for all
+			"Help document for all
+
+"enable pathogen plugin manager
+execute pathogen#infect()
+"enable signify plugin for git and hg
+let g:signify_vcs_list = [ 'git', 'hg' ]
+"Toggle TagList
+nnoremap <F11> <ESC>:TlistToggle<CR>
+" Only works if you only diff with vimdiff (and not fugitive...)
+if &diff
+    "go to next diff
+    map <F9> ]c
+    "put the diff
+    map <F10> dp
+endif
+source ~/.vimrc_custom_user
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

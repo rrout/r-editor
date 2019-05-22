@@ -1,0 +1,297 @@
+# .bash_custom_profile
+
+# If not running interactively, don't do anything
+if [[ $- != *i* ]]; then return; fi
+
+export PATH="$PATH:~/utils/bin:~/utils/tools"
+
+# User specific environment and startup programs
+# Set ENV Settings Variable
+BASH_TMUXALIAS_SETTINGS=do
+BASH_USERALIAS_SETTINGS=do
+BASH_LOCALUSERPATH_SETTINGS=do 
+BASH_USERBASH_SETTINGS=do
+BASH_HISTORY_SETTINGS=do
+BASH_EDITOR_SETTINGS=emcas
+BASH_SPACE_SETTINGS=do 
+BASH_AUTO_SETTINGS=do 
+BASH_PERMISSION_SETTINGS=do 
+BASH_LINEWRAP_SETTINGS=do 
+BASH_STTY_SETTINGS=do
+BASH_HIST_SETTINGS=dont
+BASH_COLOR_SETTINGS=do  
+BASH_LSCOLOR_SETTINGS=do 
+BASH_COMPLETION_SETTINGS=do
+BASH_PYTHONPATH_SETTINGS=do
+BASH_TOUCHFILE_SETTINGS=do 
+BASH_GTAGS_SETTINGS=do
+BASH_CTAGS_SETTINGS=do  
+BASH_SCREEN_SETTINGS=do 
+BASH_LANG_SETTINGS=do
+BASH_CVS_SETTINGS=git
+BASH_KG_SETTINGS=nokg
+BASH_DEBUG_SETTINGS=dont
+BASH_ORG_SETTINGS=fnc #brcd,pn
+
+function _f(){ p=$1; shift; find $p -type f $* ; set glob; };
+alias f="set noglob; _f"
+alias h=history
+
+
+function VGtags()
+{
+	#echo vim -c ":Gtags $1 $2"
+	if [[ $# -le  1 ]]
+	then
+		return
+	fi
+	file=$2
+	if [[ $1 = "p" ]] 
+	then
+		declare -a filename_lineno=($(echo $2 | tr "[: ]" " "))
+		file="${filename_lineno[0]}"
+	fi
+	
+	:> ~/.vim/tmp/vfiles.txt
+	vim -c ":call Gtags_$1(\"$file\")"
+	. ~/.vim/tmp/vfiles.txt
+}
+
+function DiffFiles()
+{
+	dir1="$1"
+	dir2="$2"
+	shift
+	shift
+	#echo vim -c ":call DirTreeDiffView(\"$dir1\", \"$dir2\", \"$@\")"
+	#read a
+	vim -c ":call DirTreeDiffView(\"$dir1\", \"$dir2\", \"$@\")"
+
+}
+
+function vk()
+{
+	args=$@
+	declare -a filename_lineno=($(echo $args | tr "[: ]" " "))
+	filename="${filename_lineno[0]}"
+	lineno="${filename_lineno[1]}"
+	if [[ -n "$lineno" ]]
+	then
+		lineno="+$lineno"
+	else
+		lineno="${filename_lineno[1]} ${filename_lineno[2]} ${filename_lineno[3]}  ${filename_lineno[4]}"
+	fi
+	#echo vim $filename  $lineno
+	vim $filename  $lineno
+}
+
+_x() 
+{
+    local cur prev opts
+	if [[ $COMP_CWORD -ne 1 ]]; 
+	then
+		return 0
+	fi
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="$(echo "$(global -xc  $2)" | tr "\n" " " )"
+	#echo "[$2:$cur:$prev][$opts]"
+
+	if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" ${cur}) )
+        return 0
+    fi
+}
+complete -F _x x
+complete -F _x getx
+
+_r() 
+{
+    local cur prev opts
+	if [[ $COMP_CWORD -ne 1 ]]; 
+	then
+		return 0
+	fi
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="$(echo "$(global -rc  $2)" | tr "\n" " " )"
+	#echo "[$2 $cur $prev][$opts]"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _r r
+complete -F _r getr
+
+
+_p() 
+{
+    local cur prev opts
+	if [[ $COMP_CWORD -ne 1 ]]; 
+	then
+		return 0
+	fi
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="$(echo "$(global -Poc  $2)" | tr "\n" " " )"
+	#echo "[$2|$cur|$prev][$opts]"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _p p
+complete -F _p getp
+
+
+_s() 
+{
+    local cur prev opts
+	if [[ $COMP_CWORD -ne 1 ]]; 
+	then
+		return 0
+	fi
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="$(echo "$(global -sc  $2)" | tr "\n" " " )"
+	#echo "[$2 $cur $prev][$opts]"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _s s
+complete -F _s gets
+
+
+
+_g() 
+{
+    local cur prev opts
+	if [[ $COMP_CWORD -ne 1 ]]; 
+	then
+		return 0
+	fi
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="$(echo "$(global -gc  "$2")" | tr "\n" " " )"
+	#echo "[$2 $cur $prev][$opts]"
+
+    if [[ ${cur} == * ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _g g
+complete -F _g getg
+
+cd(){
+    dir=$1;
+    to_dir="${!dir}"
+	vob_dir="${PWD%/mucho*}/${!dir}"
+	#echo "${to_dir}, ${vob_dir},  ${dir}, ${!dir}"
+
+    if [[ $# -eq 0 ]]; then
+        builtin cd $HOME;    
+    elif [[ "$dir" == "-" ]]; then
+        builtin cd -
+    elif [[ -d ${dir} ]]; then
+        builtin cd $dir;
+	elif [[ -d ${vob_dir} && -d ${to_dir} ]]; then
+		builtin cd $vob_dir
+    elif [[ -d ${to_dir} ]]; then
+        builtin cd $to_dir;
+    elif [[ "${dir}" = "base" ]]; then
+        builtin cd  "${!dir}" ;
+    else
+        builtin cd  "${dir}" ;
+    fi ;
+    echo -e "[${PWD}]";
+    echo -ne "\033]0;${HOST}: ${PWD}\007";
+	echo "${PWD}" > ${HOME}/.screen_pwd_${STY#*.}
+}
+
+
+function cgrep(){
+    if  [[ -n $1  && -n $2 ]]; then  find $2 -name "*.c" |xargs grep -sE --color $1 ; return ;fi
+    if  [[ -n $1  ]] ; then   find . -name "*.c" |xargs grep -sE --color $1 ; return ; fi
+}
+function hgrep(){
+    if  [[ -n $1  && -n $2 ]]; then  find $2 -name "*.h" |xargs grep -sE --color $1 ; return ; fi
+    if  [[ -n $1  ]] ; then   find . -name "*.h" |xargs grep -sE --color $1 ; return ; fi
+}
+function chgrep(){
+    if  [[ -n $1  && -n $2 ]]; then  find $2 -name "*.[hc]" |xargs grep -sE --color $1 ; return ; fi
+    if  [[ -n $1  ]] ; then   find . -name "*.[hc]" |xargs grep -sE --color $1 ; return ; fi
+}
+
+function cgrepi(){
+    if  [[ -n $1  && -n $2 ]]; then  find $2 -name "*.c" |xargs grep -sE --color -i $1 ; return ;fi
+    if  [[ -n $1  ]] ; then   find . -name "*.c" |xargs grep -sE --color -i $1 ; return ; fi
+}
+function hgrepi(){
+    if  [[ -n $1  && -n $2 ]]; then  find $2 -name "*.h" |xargs grep -sE --color -i $1 ; return ; fi
+    if  [[ -n $1  ]] ; then   find . -name "*.h" |xargs grep -sE --color -i $1 ; return ; fi
+}
+function chgrepi(){
+    if  [[ -n $1  && -n $2 ]]; then  find $2 -name "*.[hc]" |xargs grep -sE --color -i $1 ; return ; fi
+    if  [[ -n $1  ]] ; then   find . -name "*.[hc]" |xargs grep -sE --color -i $1 ; return ; fi
+}
+
+
+_kals() 
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts="-type -time -list"
+
+    if [[ ${cur} == -* ]] ; then
+        COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+        return 0
+    fi
+}
+complete -F _kals kals
+
+_expand() 
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+	opts=$(/bin/ls)
+
+	COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+	return 0
+}
+#complete -F _expand ls
+
+function ps1() 
+{
+    export PS1="[\`pwd\`]" 
+}
+
+rm -rf  ~/.vim/tmp/*
+
+
+function cwd()
+{
+	return "$(pwd)"
+}
+echo "${PWD}" > ${HOME}/.screen_pwd_${STY#*.}
+
+
+#. ~/.bashrc_custom_profile_user_pn
+. ~/.bashrc_custom_profile_user_fnc
+. ~/.bashrc_custom_profile_user
+

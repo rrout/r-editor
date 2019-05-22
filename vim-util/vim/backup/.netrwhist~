@@ -1,0 +1,9 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =7
+let g:netrw_dirhist_1='/data/qemumgr_sdk_repo/.repo'
+let g:netrw_dirhist_2='/home/akumar9/.ssh'
+let g:netrw_dirhist_3='/data/users/akumar9/port-blkr/meta-fnc-platform/files'
+let g:netrw_dirhist_4='/data/users/akumar9/port-blkr/meta-fnc-platform/scripts'
+let g:netrw_dirhist_5='/data/users/akumar9/rashmi/impala/.repo'
+let g:netrw_dirhist_6='/data/users/akumar9/fth/functional_test_harness/soak_logs'
+let g:netrw_dirhist_7='/home/akumar9/utils/tools'

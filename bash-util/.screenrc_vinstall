@@ -1,0 +1,164 @@
+
+deflogin on
+defscrollback 50000
+#autodetach off
+
+#vbell on
+#vbell_msg "   Wuff  ----  Wuff!!  "
+# tab-completion flash in heading bar
+#vbell off
+set bell-style none
+vbell "off"
+
+
+# all termcap entries are now duplicated as terminfo entries.
+# only difference should be the slightly modified syntax, and check for
+# terminfo entries, that are already corected in the database.
+#
+# G0    we have a SEMI-GRAPHICS-CHARACTER-MODE
+# WS    this sequence resizes our window.
+# cs    this sequence changes the scrollregion
+# hs@   we have no hardware statusline. screen will only believe that
+#       there is a hardware status line if hs,ts,fs,ds are all set.
+# ts    to statusline
+# fs    from statusline
+# ds    delete statusline
+# al    add one line
+# AL    add multiple lines
+# dl    delete one line
+# DL    delete multiple lines
+# ic    insert one char (space)
+# IC    insert multiple chars
+# nx    terminal uses xon/xoff
+
+# detach on hangup
+autodetach on
+
+# don't display the copyright page
+startup_message off
+
+# emulate .logout message
+#pow_detach_msg "Screen session of \$LOGNAME \$:cr:\$:nl:ended."
+
+altscreen on
+
+defscrollback 50000
+
+# make the shell in every window a login shell
+shell -$SHELL
+
+#defshell   bash
+bufferfile $HOME/screen-exchange
+
+################
+#
+# default windows
+#
+screen -t screen1 1
+screen -t screen2 2
+select 1
+
+# caption always "%3n %t%? @%u%?%? [%h]%?%=%c"
+# hardstatus alwaysignore
+# hardstatus alwayslastline "%Lw"
+#hardstatus string "[screen %n]:%h"
+
+multiuser on
+
+hardstatus on
+hardstatus alwayslastline
+#hardstatus lastline
+
+
+term screen-256color
+attrcolor b ".I"    # allow bold colors - necessary for some reason
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'   # tell screen how to set colors. AB = background, AF=foreground
+defbce on    # use current bg color for erased chars
+
+# http://www.gnu.org/software/screen/manual/html_node/String-Escapes.html
+# 
+#  %{= wK} : set colors to bright white (W) on bright black (K) and keep current text styles (=)
+#  %H      : hostname
+#  [       : opening bracket character
+#  %`      : print output of 'backtick' command (defined elsewhere in .screenrc)
+#  ]       : closing bracket character
+#  %{= wW} : set colors to white (w) on bright black (K) and keep current text styles (=)
+#  |       : bar character
+#  ${-}    : restore colors to previous colors / undo last color change
+#  %-Lw    : list windows before current window (L [optional] = "include flags")
+#  %{= bW} : set colors to bright white (W) on blue (b) and keep current text styles (=)
+#  %f      : window flags
+#  %t      : window title
+#  %{-}    : restore colors to previous colors / undo last color change
+#  %+Lw    : list windows after current window (L [optional] = "include flags")
+#  %=      : expand to fill all space (used here to make remaining content flush right)
+#  %C      : current time (12-hr; 24-hr is %c)
+#  %a      : am/pm (lowercase; uppercase is %A)
+#  %Y      : current year
+#  -       : hyphen character
+#  %m      : current month (0-padded; %M for "Jan" etc.)
+#  -       : hyphen character
+#  %d      : current date (0-padded)
+
+#   d     dim
+#   u    underline
+#   b    bold
+#   r    reverse
+#   s    standout
+#   B    blinking 
+#   
+#    Colors are coded either as a hexadecimal number or two letters specifying the desired background and foreground color (in that order). The following colors are known:
+#   
+#   k    black
+#   r    red
+#   g    green
+#   y    yellow
+#   b    blue
+#   m    magenta
+#   c    cyan
+#   w    white
+#   d    default color
+#   .    leave color unchanged 
+#   The capitalized versions of the letter specify bright colors. 
+
+backtick 1 1 0 logname
+backtick 2 1 0 uname -o
+backtick 3 1 0 cat ${HOME}/.screen_pwd_${STY}
+#hardstatus string '%{= wk}%-w %{wk} [ %n %t ] %{Kd}%+w %-=%{KW}| %D %M %d %Y% | %C %A %{-} '
+hardstatus string "%{= wk}%-w %{BW}[ %n %t ]%{wk}%+w   %{KW}  %S  | %H |  %1` |  %2` |  %3` %-=%{wk} %D %M %d %Y% | %C %A "
+
+#bindkey "^[Od" prev  # ctrl-left
+#bindkey "^[Oc" next  # ctrl-right
+#bindkey -k f1 prev # F5 for previous window
+#bindkey -k f2 next # F6 for next window
+
+#caption always 
+#caption string "test caption"
+
+
+
+
+#backtick 1 1 1 $(date)
+#hardstatus string "%{= wk} %1`"
+#hardstatus lastline
+
+
+
+
+
+
+
+#caption always
+#caption string "%{= bW}%3n %{y}%t %{-}%= %{m}%H%?%{-} -- %{c}%l%?%{-} -- %D %M %d %{y}%c"
+
+#term screen-256color
+attrcolor b ".I"    # allow bold colors - necessary for some reason
+termcapinfo xterm 'Co#256:AB=\E[48;5;%dm:AF=\E[38;5;%dm'   # tell screen how to set colors. AB = background, AF=foreground
+defbce on    # use current bg color for erased chars
+
+#restore vim on exit
+altscreen on
+
+#term_charset utf-8
+utf8 on on
+vbell  off

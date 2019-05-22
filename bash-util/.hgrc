@@ -1,0 +1,60 @@
+[extensions]
+hgext.cdm=/opt/onbld/lib/python/onbld/hgext/cdm.py
+hgext.extdiff =
+#mq=
+#color=
+#graphlog =
+#rebase =
+#histedit=
+extdiff=
+shelve=
+record=
+histedit=
+strip=
+convert=
+color=
+pager=
+rebase=
+progress=
+transplant=
+
+[email]
+from=rrout@pluribusnetworks.com
+
+[paths]
+onnv-gate=ssh://anon@hg.opensolaris.org//hg/onnv/onnv-gate
+
+[extdiff]
+cmd.vimdiff =
+
+
+[merge-tools]
+vim.args=-d $local $other
+vim.premerge=True
+vim.priority=1
+
+filemerge.gui=True
+filemerge.args=-a $base $local $other $output
+filemerge.priority=1
+filemerge.premerge=False
+
+meld.gui=True
+meld.priority=0
+meld.premerge=False
+
+gpyfm.gui=True
+gpyfm.priority=0
+gpyfm.premerge=False
+
+[ui]
+username=Rashmi Ranjan Rout <rrout@pluribusnetworks.com>
+style=/opt/onbld/etc/hgstyle
+editor=vim
+#merge=vim
+merge=internal:merge
+
+
+[trusted]
+users = *
+groups = *
+

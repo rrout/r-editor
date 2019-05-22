@@ -1,0 +1,623 @@
+/*
+ * esalKnet.cc
+ *
+ *  Created on: Sep 28, 2017
+ *      Author: mwessels
+ *
+ * @copyright (C) 2017 Fujitsu Network Communications, Inc.
+ */
+#if defined(VENDOR_BROADCOM)
+
+#include <sstream>
+#include <ostream>
+#include "lib/swerr.h"
+#include "headers/esalKnet.h"
+
+extern "C" {
+#include "bcm/knet.h"
+#include "bcm/error.h"
+}
+
+EsalKFilter::EsalKFilter(const EsalKFilter &in) :
+    portList(in.portList) {
+    vlan_range.valid = in.vlan_range.valid;
+    vlan_range.startVlan = in.vlan_range.startVlan;
+    vlan_range.endVlan = in.vlan_range.endVlan;
+
+    range.valid = in.range.valid;
+    range.startPort = in.range.startPort;
+    range.endPort = in.range.endPort;
+    memcpy(&filter, &in.filter, sizeof(filter));
+    unit = in.unit;
+}
+
+EsalKFilter::EsalKFilter() {
+    vlan_range.valid = false;
+    range.valid = false;
+    unit = -1;
+}
+
+EsalKnet::EsalKnet() {
+    sem_init(&sem, 0, 1);
+}
+
+EsalKnet::~EsalKnet() {
+    deleteAllInterfaces();
+    deleteStandAloneFilters();
+}
+
+void EsalKnet::bcmErrStr(const char *text, int bcmErr,
+                                     std::string&str) {
+    const int ErrNumberSize = 80;
+    str = text;
+    str += " ";
+    char errN[ErrNumberSize] = {'\0'};
+    snprintf(errN, ErrNumberSize, "%x", bcmErr);
+    str += errN;
+    str += " ";
+    std::cout << "bcmErrStr: " << bcmErr << std::endl;
+    str += bcm_errmsg(bcmErr);
+    str += "\n";
+}
+
+/*!
+ * @brief  build vector list of ports to apply a filter
+ * @param  p the filter descriptor passed from config file parser
+ * @param  p to the vector to which the ports should be added
+ * @return void
+ */
+void EsalKnet::getPortRange(EsalKFilter *in, std::vector<int>*portListP) {
+    /* its hard to improve this validation in a fashion that is generic
+     * to all chips.  Depends upon SDK to reject invalid ports
+     */
+    if (in->range.startPort < in->range.endPort) {
+        int port = 0;
+        for (port = in->range.startPort; port <= in->range.endPort; ++port) {
+            portListP->push_back(port);
+        }
+    }
+}
+
+/*!
+ * @brief  wrap BCM create knet filter function
+ * @param  unit
+ * @param  p to BCM filter struct
+ * @param  p to return handle
+ * @return true on success
+ */
+bool EsalKnet::_createFilter(int unit, bcm_knet_filter_t *filter, int *handle) {
+    bool rc = false;
+    if ((filter != nullptr) && (handle != nullptr)) {
+         int brc = bcm_knet_filter_create(unit, filter);
+         if (brc != BCM_E_NONE) {
+             std::string err;
+             bcmErrStr("EsalKnet::_createFilter", brc, err);
+             err += " VLAN ";
+             err += static_cast<int>(filter->m_vlan);
+             err += " port ";
+             err += static_cast<int>(filter->m_ingport);
+             Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                                 SWERR_FILELINE, err.c_str()));
+         } else {
+             *handle = filter->id;
+             rc = true;
+         }
+    }
+    return rc;
+}
+
+
+/*!
+ * @brief  create knet filters over a range of ports
+ * @brief  pointer to the filter descriptor from config file parser
+ * @brief  pointer to local interface struct being created or NULL for
+ *         standalone filters (e.g. BPDU)
+ * @return true is success
+ */
+bool EsalKnet::_createFilters(EsalKFilter *in, EsalKnetInterface_ *out) {
+    bool rc = true;
+    std::vector<int>portList;
+    std::vector<int>*portListP = &portList;
+    if (in == nullptr) {
+        rc = false;
+    } else if (in->range.valid) {
+        getPortRange(in, portListP);
+    } else {
+        portListP = &in->portList;
+    }
+
+    int startVlan = 0;
+    int endVlan = 0;  // one iteration if the vlan range is invalid
+    bool vlanRangeValid = false;
+    if (rc == true) {
+        vlanRangeValid = in->vlan_range.valid;
+    }
+    if (vlanRangeValid) {
+        startVlan = in->vlan_range.startVlan;
+        endVlan   = in->vlan_range.endVlan;
+    }
+
+    for (int vlan = startVlan; rc && vlan <= endVlan; vlan++) {
+        for (auto it = portListP->begin();
+             rc && (it != portListP->end());
+             ++it) {
+            bcm_knet_filter_t bcmFilter;
+            int handle;
+            std::memcpy(&bcmFilter, &in->filter, sizeof(bcm_knet_filter_t));
+            bcmFilter.m_ingport = static_cast<bcm_port_t>(*it);
+            int unit;
+            if (out) {
+                bcmFilter.dest_id = out->handle;
+                unit = out->unit;
+            } else {  // standalone filter
+                bcmFilter.dest_id = 0;
+                unit = in->unit;
+            }
+            std::string s = bcmFilter.desc;
+            std::snprintf(bcmFilter.desc, sizeof(bcmFilter.desc),
+                "%s_%02d", s.c_str(), static_cast<bcm_port_t>(*it));
+            if (vlanRangeValid) {
+                bcmFilter.m_vlan = vlan;
+            }
+            if (!_createFilter(unit, &bcmFilter, &handle)) {
+                rc = false;
+            } else {
+                EsalKnetFilter_ filter(unit, handle);
+                if (out) {
+                    out->filters.push_back(filter);
+                } else {  // standalone
+                    standAloneFilters.push_back(filter);
+                }
+            }
+        }
+    }
+    return rc;
+}
+
+/*!
+ * @brief  create knet filters for an interface specified by the config file
+ * @param  p to interface descriptor from config file parser
+ * @param  p to internal interface struct being created
+ * @return true is success
+ */
+bool EsalKnet::_createFilters(EsalKInterface *in, EsalKnetInterface_ *out) {
+    bool rc = true;
+
+    if ((in == nullptr) || (out == nullptr)) {
+        rc = false;
+    } else {
+        for (auto it = in->filterList.begin();
+                rc && (it != in->filterList.end());
+                ++it) {
+            rc = _createFilters(&(*it), out);
+        }
+    }
+    return rc;
+}
+/*!
+ * @brief  internal create interface method
+ * @param  unit
+ * @param  p to the BCM filter definition
+ * @param  p to handler returned
+ *
+ * *** about BCM_KNET_NETIF_F_KEEP_RX_TAG
+ *     New flag for knet in SDK 5.6.10 that keeps the SDK from
+ *     adding a tag
+ * ***
+ */
+bool EsalKnet::_createInterface(int unit, bcm_knet_netif_t *knetInterface,
+        int *handle) {
+    bool rc = false;
+
+    if ((knetInterface != nullptr) && (handle != nullptr)) {
+        // copy the interface struct to ensure that
+        // SDK can't corrupt the original struct
+        bcm_knet_netif_t tmpIf;
+        std::memcpy(&tmpIf, knetInterface, sizeof(bcm_knet_netif_t));
+#ifdef BCM_KNET_NETIF_F_KEEP_RX_TAG
+        tmpIf.flags |= BCM_KNET_NETIF_F_KEEP_RX_TAG;
+#endif
+        int brc = bcm_knet_netif_create(unit, &tmpIf);
+        if (brc != BCM_E_NONE) {
+            std::string err;
+            bcmErrStr("EsalKnet::_createInterface", brc, err);
+            Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                                SWERR_FILELINE, err.c_str()));
+        } else {
+            *handle = tmpIf.id;
+            rc = true;
+        }
+    }
+    return rc;
+}
+
+/* reader help / debug help /call tree
+ *
+ * createInterface(EsalKInterface *esalKInterface
+ *   _createInterface(int unit, bcm_knet_netif_t *knetInterface,
+                      int *handle)
+     _createFilters(EsalKInterface *in, EsalKnetInterface_ *out
+       _createFilters(EsalKFilter *in, EsalKnetInterface_ *out)
+         _createFilter(int unit, bcm_knet_filter_t *filter, int *handle)
+ */
+
+// external interface for use with config file - see header
+bool EsalKnet::createInterface(EsalKInterface *esalKInterface) {
+    bool rc = false;
+    sem_wait(&sem);
+
+    if (esalKInterface != nullptr) {
+        EsalKnetInterface_ interface;
+        interface.name = esalKInterface->interface.name;
+        interface.unit = esalKInterface->unit;
+        int handle;
+        if (_createInterface(interface.unit, &esalKInterface->interface,
+                &handle)) {
+            interface.handle = handle;
+            rc = _createFilters(esalKInterface, &interface);
+            interfaces.push_back(interface);
+        }
+    }
+    sem_post(&sem);
+
+    return rc;
+}
+
+// external interface for direct use by chip driver - see header
+bool EsalKnet::createInterface(int unit, bcm_knet_netif_t *netif,
+        int *handle) {
+    bool rc = false;
+
+    if (netif != nullptr) {
+        // let Broadcom detect duplicates
+//        int bogusHandle = getInterfaceHandle(netif->name);
+//        if (bogusHandle != -1) {
+        sem_wait(&sem);
+
+            rc = _createInterface(unit, netif, handle);
+            if (rc) {
+                EsalKnetInterface_ interface;
+                interface.name = netif->name;
+                interface.unit = unit;
+                if (_createInterface(unit, netif, handle)) {
+                    interface.handle = *handle;
+                    interfaces.push_back(interface);
+                    rc = true;
+//                }
+            }
+        }
+        sem_post(&sem);
+    }
+    return rc;
+}
+
+// external interface to add a filter to an existing interface - see header
+bool EsalKnet::createFilter(int unit, int interfaceHandle,
+        bcm_knet_filter_t *bcmFilter,
+        int *handle) {
+    bool rc = false;
+
+    if ((bcmFilter == nullptr) || (handle == nullptr)) {
+    } else {
+        sem_wait(&sem);
+        std::vector<EsalKnetInterface_>::iterator it =
+                getInterfaceByHandle(interfaceHandle);
+        if (it == interfaces.end()) {
+            Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                                SWERR_FILELINE, "createFilter: no interface"));
+        } else {
+            int _handle;
+            bcm_knet_filter_t tmpFilter;
+            std::memcpy(&tmpFilter, bcmFilter, sizeof(bcm_knet_filter_t));
+            rc = _createFilter(unit, &tmpFilter, &_handle);
+            if (rc) {
+                EsalKnetFilter_ filter(unit, _handle);
+                it->filters.push_back(filter);
+                *handle = _handle;
+                rc = true;
+            }
+        }
+        sem_post(&sem);
+    }
+
+    return rc;
+}
+
+bool EsalKnet::createFilter(int unit, EsalKFilter *esalKFilter) {
+    bool rc = false;
+    if (esalKFilter == nullptr) {
+    } else {
+        esalKFilter->unit = unit;
+        sem_wait(&sem);
+        rc = _createFilters(esalKFilter, nullptr);
+        sem_post(&sem);
+    }
+
+    return rc;
+}
+
+std::vector<EsalKnetFilter_>::iterator EsalKnet::_findFilter(int handle,
+        std::vector<EsalKnetFilter_> *p) {
+    std::vector<EsalKnetFilter_>::iterator it;
+    for (it = p->begin(); it != p->end(); ++it) {
+        if (handle == it->handle) {
+            break;
+        }
+    }
+    return it;
+}
+
+// external interface for use by chip driver
+bool EsalKnet::deleteFilter(int filterHandle, int interfaceHandle) {
+    bool rc = false;
+    sem_wait(&sem);
+    std::vector<EsalKnetInterface_>::iterator iit =
+            getInterfaceByHandle(interfaceHandle);
+    if (iit == interfaces.end()) {
+        Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                            SWERR_FILELINE, "deleteFilter: no interface"));
+    } else {
+        std::vector<EsalKnetFilter_>::iterator filter =
+                _findFilter(filterHandle, &(iit->filters));
+        if (filter != iit->filters.end()) {
+            rc = _deleteFilter(filter->unit, filter->handle);
+            iit->filters.erase(filter);
+        }
+    }
+    sem_post(&sem);
+    return rc;
+}
+
+bool EsalKnet::_deleteFilter(int unit, int handle) {
+    bool rc = false;
+    int brc = bcm_knet_filter_destroy(unit, handle);
+    if (brc == BCM_E_NONE) {
+        rc = true;
+    } else {
+        std::string err;
+         bcmErrStr("EsalKnet::_deleteFilter", brc, err);
+         Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                             SWERR_FILELINE, err.c_str()));
+    }
+    return rc;
+}
+
+bool EsalKnet::_deleteFilters(std::vector<EsalKnetFilter_> *filters) {
+    bool rc = true;
+
+    if (filters == nullptr) {
+        rc = false;
+         Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                             SWERR_FILELINE, "it is null"));
+    } else {
+        for (auto it = filters->begin(); it != filters->end(); ++it) {
+            _deleteFilter(it->unit, it->handle);
+            //  filters->erase(it);  don't do this!
+        }
+        filters->clear();
+    }
+    return rc;
+}
+
+bool EsalKnet::_deleteInterface(int unit, int handle) {
+    bool rc = false;
+
+    std::cout << "_deleteInterface " << handle << std::endl << std::flush;
+    int brc = bcm_knet_netif_destroy(unit, handle);
+    if (brc == BCM_E_NONE) {
+        rc = true;
+    } else {
+        std::string err;
+         bcmErrStr("EsalKnet::_deleteInterface", brc, err);
+         Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                             SWERR_FILELINE, err.c_str()));
+    }
+    return rc;
+}
+
+bool EsalKnet::_deleteInterface(std::vector<EsalKnetInterface_>::iterator it) {
+    bool rc = true;
+
+    EsalKnetInterface_ *interface = &(*it);
+    std::cout << "EsalKnet::_deleteInterface deleting filters for if "
+              << it->name << std::endl << std::flush;
+    std::cout << "EsalKnet::_deleteInterface deleting filters for if "
+                  << interface->name << std::endl << std::flush;
+    if (_deleteFilters(&(interface->filters))) {
+        rc = _deleteInterface(interface->unit, interface->handle);
+// don't do this!  Clear the while vector after the iteration is complete
+//        interfaces.erase(it);
+    }
+
+    return rc;
+}
+
+bool EsalKnet::deleteInterface(const char *name) {
+    bool rc = false;
+
+    sem_wait(&sem);
+    std::vector<EsalKnetInterface_>::iterator it = getInterfaceByName(name);
+    if (it != interfaces.end()) {
+        rc = _deleteInterface(it);
+    }
+    sem_post(&sem);
+
+    return rc;
+}
+
+bool EsalKnet::deleteInterface(int handle) {
+    bool rc = false;
+
+    sem_wait(&sem);
+    std::vector<EsalKnetInterface_>::iterator it = getInterfaceByHandle(handle);
+    if (it != interfaces.end()) {
+        rc = _deleteInterface(it);
+    }
+    sem_post(&sem);
+    return rc;
+}
+
+
+bool EsalKnet::deleteAllInterfaces() {
+    bool rc = false;
+
+    sem_wait(&sem);
+    for (std::vector<EsalKnetInterface_>::iterator it = interfaces.begin();
+             it != interfaces.end();
+             ++it) {
+         _deleteInterface(it);
+    }
+    interfaces.clear();
+    sem_post(&sem);
+    return rc;
+}
+
+void EsalKnet::deleteStandAloneFilters() {
+    sem_wait(&sem);
+    _deleteFilters(&standAloneFilters);
+    standAloneFilters.clear();
+    sem_post(&sem);
+}
+
+std::vector<EsalKnetInterface_>::iterator
+EsalKnet::getInterfaceByName(const char *name) {
+    bool found = false;
+    std::string nm = name;
+    std::vector<EsalKnetInterface_>::iterator rc;
+    for (std::vector<EsalKnetInterface_>::iterator it = interfaces.begin();
+            !found && (it != interfaces.end());
+         ++it) {
+        EsalKnetInterface_ *ife = &(*it);
+        if (nm.compare(ife->name) == 0) {
+            rc = it;
+            found = true;
+        }
+    }
+    return rc;
+}
+
+
+std::vector<EsalKnetInterface_>::iterator
+EsalKnet::getInterfaceByHandle(int handle) {
+    bool found = false;
+    std::vector<EsalKnetInterface_>::iterator rc = interfaces.end();
+    for (std::vector<EsalKnetInterface_>::iterator it = interfaces.begin();
+            !found && (it != interfaces.end());
+         ++it) {
+        EsalKnetInterface_ *ife = &(*it);
+        if (handle == ife->handle) {
+            rc = it;
+            found = true;
+        }
+    }
+    return rc;
+}
+
+int EsalKnet::getInterfaceHandle(const char *name) {
+    int rc = -1;
+
+    std::vector<EsalKnetInterface_>::iterator it = getInterfaceByName(name);
+    if (it != interfaces.end()) {
+        rc = it->handle;
+    }
+    return rc;
+}
+
+void EsalKnet::findFilter(int interfaceHandle,
+                            std::function<bool(int handle,
+                            const bcm_knet_filter_t *filter)> callback) {
+    std::vector<EsalKnetInterface_>::iterator iit;
+
+    sem_wait(&sem);
+    iit = getInterfaceByHandle(interfaceHandle);
+    if (iit != interfaces.end()) {
+        bool found = false;
+        for (auto fit = iit->filters.begin();
+             !found && (fit != iit->filters.end());
+             ++fit) {
+            bcm_knet_filter_t bcmFilter;
+            int brc = bcm_knet_filter_get(fit->unit, fit->handle, &bcmFilter);
+            if (brc != BCM_E_NONE) {
+                Swerr::generate(Swerr(Swerr::SwerrLevel::KS_SWERR_ONLY,
+                        SWERR_FILELINE, "findFilter"));
+                break;
+            } else {
+                found = callback(fit->handle, &bcmFilter);
+            }
+        }
+    }
+    sem_post(&sem);
+}
+
+std::ostream &operator<<(std::ostream &os, EsalKnetFilter_ &esalKnetFilter_) {
+    std::stringstream ss;
+    ss << "    unit/" << esalKnetFilter_.unit
+       << " handle/" << esalKnetFilter_.handle;
+    os << ss.str();
+
+    return os;
+}
+
+std::ostream &operator<<(std::ostream &os,
+        EsalKnetInterface_ &esalKnetInterface_) {
+    std::stringstream ss;
+    ss << esalKnetInterface_.name << " unit/"
+       << esalKnetInterface_.unit
+       << " handle/"
+       << esalKnetInterface_.handle;
+    os << ss.str();
+    return os;
+}
+
+void EsalKnet::dump(DipCommand *cmd) {
+    bool useDip = (cmd == nullptr) ? false : true;
+
+    if (useDip) {
+      cmd->dip_reply("ESAL Knet Tables\n");
+    }
+    for (auto iit = interfaces.begin(); iit != interfaces.end(); ++iit) {
+        if (useDip) {
+#ifndef UTS
+            std::stringstream ss;
+            ss << *iit << std::endl;
+            cmd->dip_reply(ss.str().c_str());
+#endif
+        } else {
+            std::cout << *iit << std::endl;
+        }
+        for (auto fit = iit->filters.begin(); fit != iit->filters.end();
+                ++fit) {
+            if (useDip) {
+#ifndef UTS
+                std::stringstream ss;
+                ss << *fit << std::endl;
+                cmd->dip_reply(ss.str().c_str());
+#endif
+            } else {
+                std::cout << *fit << std::endl;
+            }
+        }
+    }
+    if (useDip) {
+      cmd->dip_reply("SDK Knet Tables\n");
+    }
+    displayKnet();
+}
+
+extern "C" {
+    int _trav_filter(int unit, bcm_knet_filter_t *filter, void *user_data);
+    int _trav_netif(int unit, bcm_knet_netif_t *netif, void *user_data);
+}
+
+void EsalKnet::displayKnet(void) {
+    int count;
+    int unit = 0;
+    std::printf("%s:%s():%d: Printing filter Items \n",
+            __FILE__, __FUNCTION__, __LINE__);
+    bcm_knet_filter_traverse(unit, _trav_filter, &count);
+    std::printf("%s:%s():%d: Printing netif Items \n", __FILE__,
+            __FUNCTION__, __LINE__);
+    bcm_knet_netif_traverse(unit, _trav_netif, &count);
+}
+
+#endif

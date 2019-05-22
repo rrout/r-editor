@@ -1,0 +1,74 @@
+#!/bin/bash
+########################################################################
+# Script Name: cron_soak_status.sh
+# 
+# Description:i The script is used in cron job to send status mail
+#
+#########################################################################
+BASE_DIR="/data/users/akumar9/fth/functional_test_harness/"
+
+###########################################################################
+# Description : The function will get the logs and status from all qemu's
+##########################################################################
+function get_soak_status (){
+    cd $BASE_DIR
+    ./dds_multi_qemu_launcher.sh -soakstatus
+    if [ ! -f $BASE_DIR/soak_logs/FAILED_SOAK.log ]; then 
+      STATUS="RUNNING"
+    else 
+      STATUS="FAILED"
+    fi
+    if [ -f $BASE_DIR/soak_logs/soak_monitor_main.log ]; then 
+      tail -55 $BASE_DIR/soak_logs/soak_monitor_main.log > emailout
+    else 
+      exit 0
+    fi
+
+}
+###########################################################################
+# Description : The function will send mail with log output  
+##########################################################################
+function soak_send_mail () {
+
+    echo "To : $TOEMAIL " > mail.txt
+    echo "Subject : SOAK TESTS $STATUS" >> mail.txt
+    echo "From : Arvind.Kumar@us.fujitsu.com " >> mail.txt
+    cat emailout >> mail.txt
+    # send an email using /bin/mail
+    /usr/sbin/sendmail -vt  < $BASE_DIR/mail.txt 
+}
+
+
+function usage ()
+{
+   echo "Usage: cron_soak_status.sh -toemail <mailid>"
+}
+
+########################################################################
+# MAIN :  The script is used for cron job.
+#######################################################################
+while [ "$1" != "" ]; do
+    case "$1" in
+          -toemail)
+              shift 
+              TOEMAIL="$1"
+              ;;
+          -status)
+              shift
+              SOAKSTATUS="$1"
+              ;;
+          -help)
+              usage
+              ;;
+    esac
+    shift
+done
+
+#Get the soak test status from the qemu
+get_soak_status
+
+# Send the status mail 
+soak_send_mail
+
+
+

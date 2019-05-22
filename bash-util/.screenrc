@@ -1,0 +1,126 @@
+ #
+ #  NOTE: when using rxvt, use the option `-is +sk', allowing Shift-PageUP/DOWN to work
+ #        (or use according resouces)
+ #
+ # ------------------------------------------------------------------------------
+ # STARTUP SCREENS
+ # ------------------------------------------------------------------------------
+ 
+ screen 1
+ 
+ # ------------------------------------------------------------------------------
+ # TERMINAL/SCREEN SETTINGS
+ # ------------------------------------------------------------------------------
+ 
+ # Stops apps from leaving their content on the screen 
+ altscreen on 
+
+ startup_message off
+ 
+ deflogin on
+ autodetach on
+ 
+ nethack on            # (Silly) messages
+ 
+ msgminwait 0          # the first message is ignored.
+ msgwait 10            # the last message is displayed for 10 seconds or
+                       # until keypress.
+ 
+ 
+ # Make screen messages stand out a little more - black on bright green.
+ sorendition "+b kG"
+ 
+ # Variants on Sven's custom messages.
+ activity "%c activity -> %n%f %t"
+ bell "%c:bell -> %n%f %t^G"
+ vbell off
+ vbell_msg " *beep* "
+ 
+ # Keep dead windows around until I tell them to exit.
+ zombie cr
+ 
+ # And show the command for the windows when they're resurrected.
+ verbose on
+ 
+ # scrollback
+ defscrollback 50000
+ 
+ # If a window goes unresponsive, don't block the whole session waiting for it.
+ nonblock on
+
+ # Window numbering starts at 1, not 0.
+ bind c screen 1
+ bind ^c screen 1
+ bind 0 select 10
+ 
+ 
+ # set these terminals up to be 'optimal' instead of vt100
+ termcapinfo xterm*|linux*|rxvt*|Eterm* "hs:ts=\E]0;:fs=\007;ds=\E]0;screen\007"
+ 
+ # Use X scrolling mechanism
+ termcapinfo xterm|xtermc|xterm* ti@:te@ 
+
+ hardstatus on
+ hardstatus alwayslastline
+ hardstatus string "%h"
+ caption always "%?%F%{-b bc}%:%{-b bb}%?%C:%s|%D|%M %d|%H|Load=%l|${USER}|%?%F%{+u wb}%? %L=%-Lw%45>%{+b by}%n%f* %t%{-}%+Lw%-0<"
+
+ #hardstatus on
+ #hardstatus alwayslastline
+ #hardstatus string "%{.1099} %-w%{.bg}%n %t%{-}%+w %h %=%H %c:%s "
+ #defbce on
+ #hardstatus string "%{.1099} %-w%{.bg}%n %t%{-}%+w %h %=%H %c:%s "
+ #hardstatus string "screen %n (%t)%? [%h]%?"
+ 
+ # see at EOF
+ #caption always "%?%F%{-b bc}%:%{-b bb}%?%C|%D|%M %d|%H%?%F%{+u wb}%? %L=%-Lw%45>%{+b by}%n%f* %t%{-}%+Lw%-0<"
+ 
+ # ------------------------------------------------------------------------------
+ # SCREEN KEYBINDINGS
+ # ------------------------------------------------------------------------------
+ escape ^Xx 
+ 
+ 
+ # ------------------------------------------------------------------------------
+ # caption description:
+ # ------------------------------------------------------------------------------
+ #
+ # caption always "%?%F%{-b bc}%:%{-b bb}%?%C|%D|%M %d|%H%?%F%{+u wb}%? %L=%-Lw%45>%{+b by}%n%f* %t%{-}%+Lw%-0<"
+ # 
+ # Anything I don't describe is treated literally.
+ # 
+ # %?          - Start of a conditional statement.
+ #  %F         - Use this part of the statement if the window has focus (i.e. it
+ #               is the only window or the currently active one).
+ #  %{-b bc}   - Turn off bold, blue foreground, cyan background.
+ # %:          - else
+ #  %{-b bb}   - Turn off bold, blue foreground, blue background (this obscures
+ #               the text on non-focused windows and just gives a blue line).
+ # %?          - End conditional statement.
+ #  %C         - time (hh:mm, leading space) in 12 hour format
+ #  %D         - Three-letter day-of-week appreviation
+ #  %M         - Three-letter month appreviation
+ #  %d         - Day of the month
+ #  %H         - hostname
+ #  %?         - Start of conditional statement.
+ #   %F        - Use this part of the statement if the window has focus.
+ #   %{+u wb}  - underlined, white foreground, blue background
+ #  %?         - End conditional (if not focused, text remaind blue on blue).
+ #    %L=      - truncation/padding point.  With the 'L' qualifier, basically
+ #               just acts as a reference point.  Further truncation/padding is
+ #               done relative to here, not the beginning of the string
+ #    %-Lw     - window list up to but not including the current window (-),
+ #               show window flags (L)
+ #    %45>     - truncation/padding marker; place this point about 45% of the
+ #               way into the display area (45)
+ #    %{+b by} - add bold (still underlined from before), blue foreground,
+ #               yellow background
+ #      %n     - number of the current window
+ #      %f     - flags for current window
+ #      %t     - title of current window
+ #    %{-}     - undo last color change (so now we're back to underlined white
+ #               on blue)  (technically, this is a pop; a second invocation
+ #               would drop things back to unadorned blue on cyan)
+ #    %+Lw     - window list from the next window on (-), show window flags (L)
+ #    %-0<     - truncation/padding point.  Place this point zero spaces (0)
+ #               from the right margin (-).

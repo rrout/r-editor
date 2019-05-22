@@ -1,0 +1,234 @@
+#!/bin/bash
+
+function kill_progress()
+{
+	kill $1 2>&1 > /dev/null
+}
+function progress()
+{
+	sleep 1;
+	while true
+	do
+		echo -n .;
+		sleep 1;
+	done 
+}
+progress &
+progress_id=$!
+trap 'kill_progress $progress_id' SIGINT
+
+
+echo -e "[ Compressing the installation files ... ]"
+TMP_FILE="/tmp/config_$(date +%m%d%y%H%M%S).tar.gz"
+#TMP_DATA="data_$(date +%m%d%y%H%M%S).tar.gz"
+rm -rf  ~/.vim/tmp/*
+cd ~/
+echo -e "[ Compressing the user files..... ]"
+find .vim* .bash* .net* .screen* .bash*  .global* .input* .sqliterc*  utils/source* utils/tools* .colormake* .tmux* .hg*
+.custom*
+
+
+tar -zcf $TMP_FILE .vim* .bash* .net* .screen* .bash*  .global* .input* .sqliterc*  utils/source* utils/tools* .colormake* .tmux* .hg* .custom* \
+	 --exclude=.bash_history --exclude=.vimyankring_history_v2.txt --exclude=.viminfo 
+TMP_DATA="$(cat $TMP_FILE |base64 )"
+
+META_DATA="BIN_DATA_$(date +%m%d%y%H%M%S)"
+
+echo -e "\n[ Creating self installing executable ... ]"
+(
+#Headers
+cat <<EOF >~/rinstall
+#!/bin/bash
+
+
+function kill_progress
+{
+	kill \$1 2>&1 > /dev/null
+}
+function progress
+{
+	sleep 1;
+	while true
+	do
+		echo -n .;
+		sleep 1;
+	done 
+}
+
+
+echo -e "\n[ Setting permission ]"
+echo "User name:\$(whoami)"
+read -rsp "Password:" password
+crypt="\$(echo \${password} | base64)"
+echo "\${crypt}" >>~/.crypt
+#ssh -l \$(whoami) -p \${crypt}
+
+
+progress &
+progress_id=\$!
+trap 'kill_progress \$progress_id' SIGINT
+
+
+
+
+
+echo -e "\n[ Taking backup of existing files and settings ]"
+filename="config_old_\$(date +%m.%d.%y-%H.%M.%S).tar.gz"
+cd ~/
+mkdir -p ~/.backup
+(find .vim* .bash* .net* .screen* .input* .global* .colormak*| xargs tar -zcf ~/.backup/\$filename ) 2>/dev/null 
+EOF
+
+#Content
+cat <<EOF >>~/rinstall
+echo -e "\n[ Installing the binaries ]"
+
+cat<<'$META_DATA' | base64 -d 2>/dev/null | tar -zxf -  
+$TMP_DATA
+$META_DATA
+EOF
+
+#Footer
+cat <<EOF >>~/rinstall
+
+export PATH=\${HOME}/utils/bin:\${HOME}/utils/tools:\$PATH
+export LIBS=-L\${HOME}/utils/lib
+export CPPFLAGS=-I\${HOME}/utils/include
+export CFLAGS=" --static -I\${HOME}/utils/include "
+export LDFLAGS=" --static -L\${HOME}/utils/lib "
+
+MAKE="\$(gmake -v 1>/dev/null 2>/dev/null &&  echo gmake || echo make) "
+
+
+
+echo -e "\n[ Making ctags ]"
+mkdir -p ~/source
+cd ~/source
+tar -zxf ~/utils/sources/ctags-5.8.tar.gz >>vmake.log.txt
+cd ctags-5.8
+\$MAKE clean >>vmake.log.txt
+mkdir -p ~/utils
+./configure --prefix=\${HOME}/utils --disable-gtagscscope >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE  2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+echo -e "\n[ Making ncurses ]"
+cd ~/source
+tar -zxf ~/utils/sources/ncurses-5.9.tar.gz >>vmake.log.txt
+cd ncurses-5.9
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE  2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+echo -e "\n[ Making vim ]"
+vim_version="\$(vim --version |grep IMproved| sed 's/.*IMproved \([^ ]\+\)\.\([^ ]\+\).*/\1\2/g')"
+if [[ "\${vim_version}" < "74" ]]
+then
+	cd ~/source
+	tar -zxf ~/utils/sources/vim-7.4.tar.gz >>vmake.log.txt
+	cd vim74
+	\$MAKE clean >>vmake.log.txt
+	./configure --prefix=\${HOME}/utils  --enable-static --disable-shared CFLAGS="-g -O0 --static \${CFLAGS} " LDFLAGS=" --static \${LDFLAGS}"  >>vmake.log.txt
+	\$MAKE clean >>vmake.log.txt
+	\$MAKE  2>&1 >>vmake.log.txt
+	\$MAKE install >>vmake.log.txt
+fi
+
+
+echo -e "\n[ Making gtags ]"
+cd ~/source
+tar -zxf ~/utils/sources/global-6.5.6.tar.gz >>vmake.log.txt
+cd global-6.5.6
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils --with-sqlite3 --disable-gtagscscope --with-exuberant-ctags=\${HOME}/utils/bin/ctags  --enable-static --disable-shared CFLAGS="-g -O0 --static \${CFLAGS} " LDFLAGS=" --static \${LDFLAGS}" >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE  2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+echo -e "\n[ Making bash ]"
+cd ~/source
+tar -zxf ~/utils/sources/bash-4.3.tar.gz >>vmake.log.txt
+cd bash-4.3
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils  --enable-static-link --without-bash-malloc >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE  2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+echo -e "\n[ Making pcre search ]"
+cd ~/source
+tar -zxf ~/utils/sources/pcre.tar.gz >>vmake.log.txt
+cd pcre
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils --enable-pcre16 --enable-pcre32 --enable-jit --enable-rebuild-chartables --enable-newline-is-cr --enable-newline-is-lf --enable-newline-is-crlf --enable-newline-is-anycrlf --enable-newline-is-any --enable-bsr-anycrlf >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE 2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+echo -e "\n[ Making pcre2 search ]"
+cd ~/source
+tar -zxf ~/utils/sources/pcre2.tar.gz >>vmake.log.txt
+cd pcre2-10.00
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils  --enable-pcre2-16 --enable-pcre2-32 --enable-jit --enable-rebuild-chartables --enable-newline-is-cr --enable-newline-is-lf --enable-newline-is-crlf --enable-newline-is-anycrlf --enable-newline-is-any --enable-bsr-anycrlf  >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE 2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+echo -e "\n[ Making lzma search ]"
+cd ~/source
+tar -zxf ~/utils/sources/lzma.tar.gz >>vmake.log.txt
+cd lzma
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils  
+\$MAKE clean >>vmake.log.txt
+\$MAKE 2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+
+echo -e "\n[ Making gold search ]"
+cd ~/source
+tar -zxf ~/utils/sources/kg_searcher.tar.gz >>vmake.log.txt
+cd kg_searcher
+\$MAKE clean >>vmake.log.txt
+./configure --prefix=\${HOME}/utils --disable-zlib >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE 2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+echo -e "\n[ Making vmtouch ]"
+cd ~/source
+tar -zxf ~/utils/sources/vmtouch.tar.gz >>vmake.log.txt
+cd vmtouch
+\$MAKE clean >>vmake.log.txt
+\$MAKE clean >>vmake.log.txt
+\$MAKE  2>&1 >>vmake.log.txt
+\$MAKE install >>vmake.log.txt
+
+
+
+
+touch ~/.custom_profile
+touch ~/.custom_vimrc
+chmod 644 ~/.crypt
+
+echo -e "\n[ Installation complete ]"
+kill_progress \$progress_id 2>&1 >/dev/null
+EOF
+
+)
+
+chmod 777 ~/rinstall
+echo -e "\n[ Creating executable completed ]"
+trap '' SIGINT
+kill_progress $progress_id 2>&1 >/dev/null
+
