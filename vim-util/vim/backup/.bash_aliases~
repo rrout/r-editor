@@ -1,7 +1,38 @@
+# .bash_aliases
 
-#if [[ $- != *i* ]];then
-#return;
-#fi
+if [[ $- != *i* ]];then return; fi
+
+#Usage :pathappend <P1> <P2> <P3> # it checks the indivisual string
+pathappend() {
+  for ARG in "$@"
+  do
+    if [ -d "$ARG" ] && [[ ":$PATH:" != *":$ARG:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$ARG"
+    fi
+  done
+}
+
+#Usage :pathprepend <P1> <P2> <P3> # it checks the indivisual string
+pathprepend() {
+  for ((i=$#; i>0; i--)); 
+  do
+    ARG=${!i}
+    if [ -d "$ARG" ] && [[ ":$PATH:" != *":$ARG:"* ]]; then
+        PATH="$ARG${PATH:+":$PATH"}"
+    fi
+  done
+}
+
+# bash does cache the full path to a command
+# To clear the entire cache: $hash -r  # Or just one entry: $ hash -d <>
+# https://unix.stackexchange.com/questions/5609/how-do-i-clear-bashs-cache-of-paths-to-executables
+#Usage :pathadd <P1:P2:P3> # it checks the whole string
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+
 
 if [ "$BASH_TMUXALIAS_SETTINGS" == "yes" ];then
 if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting TMUXALIAS_SETTINGS=$BASH_TMUXALIAS_SETTINGS ........"; fi
@@ -43,24 +74,64 @@ alias la="ls -al"
 alias ltr="ls -ltr"
 alias l="ls --color=auto --format=horizontal -XF "
 
+
+ucd(){
+    dir=$1;
+    to_dir="${!dir}"
+    vob_dir="${PWD%/mucho*}/${!dir}"
+    #echo "${to_dir}, ${vob_dir},  ${dir}, ${!dir}"
+
+    if [[ $# -eq 0 ]]; then
+        builtin cd $HOME;
+    elif [[ "$dir" == "-" ]]; then
+        builtin cd -
+    elif [[ -d ${dir} ]]; then
+        builtin cd $dir;
+    elif [[ -d ${vob_dir} && -d ${to_dir} ]]; then
+        builtin cd $vob_dir
+    elif [[ -d ${to_dir} ]]; then
+        builtin cd $to_dir;
+    elif [[ "${dir}" = "base" ]]; then
+        builtin cd  "${!dir}" ;
+    else
+        builtin cd  "${dir}" ;
+    fi ;
+    echo -e "[${PWD}]";
+    echo -ne "\033]0;${HOST}: ${PWD}\007";
+    echo "${PWD}" > ${HOME}/.screen_pwd_${STY#*.}
+}
+
 fi
 
 if [ "$BASH_LOCALUSERPATH_SETTINGS" == "yes" ];then
 if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting LOCALUSERPATH_SETTINGS=$BASH_LOCALUSERPATH_SETTINGS ........"; fi
 # Add local tools to main path
-export PATH="$PATH:~/utils/bin:~/utils/tools"
+#export PATH="$PATH:~/utils/bin:~/utils/tools"
+pathappend ~/utils/bin
+pathappend ~/utils/tools
 #export MANPATH=${MANPATH}:/usr/local/man
 #export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib:${HOME}/utils/lib
 fi
 
 if [ "$BASH_HISTORY_SETTINGS" == "yes" ];then
 if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting HISTORY_SETTINGS=$BASH_HISTORY_SETTINGS ........"; fi
-# History search
+# History search :use "bind -p to display all settings
 bind '"\e[A":history-search-backward'
 bind '"\e[B":history-search-forward'
+bind '"\e[1~": beginning-of-line'     # Home key
+bind '"\e[4~": end-of-line'           # End key
 # History search for bash shell
-#shopt -s histappend
-#PROMPT_COMMAND='history -a'
+# The following line ensures that history logs screen commands as well
+shopt -s histappend
+# This line makes the history file to be rewritten and reread at each bash prompt
+#PROMPT_COMMAND="$PROMPT_COMMAND history -a; history -c; history -r"
+#PROMPT_COMMAND="$PROMPT_COMMAND history -a"
+#export PROMPT_COMMAND='history -a; history -r'
+PROMPT_COMMAND='history -a'
+# Have lots of history
+HISTSIZE=100000         # remember the last 100000 commands
+HISTFILESIZE=100000     # start truncating commands after 100000 lines
+HISTCONTROL=ignoreboth  # ignoreboth is shorthand for ignorespace and     ignoredups
 #if [[ $- == *i* ]]
 #then
     #bind '"\e[A": history-search-backward'
@@ -79,19 +150,6 @@ if [ ! -f "/bin/bash" ]; then
     export SHELL=~/utils/bin/bash
 fi
 fi
-if [ "$BASH_EDITOR_SETTINGS" == "vi" ];then
-if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting EDITOR_SETTINGS=$BASH_EDITOR_SETTINGS ........"; fi
-#set -o vi
-#export PS1="# "
-#set editing-mode vi
-#set keymap vi
-#set convert-meta on
-
-#set bell-style nd '"\t":menu-complete'
-bind -m vi-insert "\C-p":dynamic-complete-history
-bind -m vi-insert "\C-n":menu-complete
-bind -m vi-insert "\C-l":clear-screen
-#bind -m vi-insert '" "':menu-completenone
 
 if [ "$BASH_SPACE_SETTINGS" == "yes" ];then
 if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting SPACE_SETTINGS=$BASH_SPACE_SETTINGS ........"; fi
@@ -120,6 +178,17 @@ bind '"^[[20~"':"\"\!:8 \""
 bind '"^[[21~"':"\"\!:9 \""
 
 fi
+
+if [ "$BASH_EDITOR_SETTINGS" == "vi" ];then
+if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting EDITOR_SETTINGS=$BASH_EDITOR_SETTINGS ........"; fi
+
+#export PS1="# "
+
+#set bell-style nd '"\t":menu-complete'
+bind -m vi-insert "\C-p":dynamic-complete-history
+bind -m vi-insert "\C-n":menu-complete
+bind -m vi-insert "\C-l":clear-screen
+#bind -m vi-insert '" "':menu-completenone
 
 bind '"\en"':"\"^N\""
 bind '"\ef"':"\"find  \ei\""
@@ -241,19 +310,16 @@ fi
 
 if [ "$BASH_AUTO_SETTINGS" == "yes" ];then
 if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting AUTO_SETTINGS=$BASH_AUTO_SETTINGS ........"; fi
-#set echo-control-characters off
-#set show-all-if-ambiguous on
-#set -o vi
-#set editing-mode vi
-#set keymap vi
-#set convert-meta on
-#set bell-style none
-#set echo-control-characters off
-#set show-all-if-ambiguous on
+set -o vi
+set editing-mode vi
+set keymap vi
+set convert-meta on
+set bell-style none
+set echo-control-characters off
+set show-all-if-ambiguous on
 #single tab completion
-#set show-all-if-ambiguous on
-#set completion-query-items 3500
-#set completion-ignore-case on
+set completion-query-items 3500
+set completion-ignore-case on
 fi
 
 if [ "$BASH_PERMISSION_SETTINGS" == "yes" ];then
@@ -443,7 +509,8 @@ elif [ "$BASH_CVS_SETTINGS" == "mercurial" ];then
 
     alias insw='bash /build/rrout/dbg/switchinstall.sh'
     alias cpsw='bash /build/rrout/dbg/switchinstallnvOSBin.sh'
-    PATH="$PATH:/opt/onbld/bin"
+    #PATH="$PATH:/opt/onbld/bin"
+    pathappend /opt/onbld/bin
 
 # End Org Specific
 
@@ -512,6 +579,7 @@ elif [ "$BASH_CVS_SETTINGS" == "mercurial" ];then
     }
 elif [ "$BASH_CVS_SETTINGS" == "clearcase" ];then
     alias ct="cleartool"
+    alias cd="ucd"
     alias lsco-a='hg status -m'
     alias lsco-al="hg status"
     alias vdiff='hg vimdiff'
@@ -550,7 +618,10 @@ elif [ "$BASH_CVS_SETTINGS" == "clearcase" ];then
 
     alias rd="cd /build/rrout"
     alias wd="cd /build/webrev/rrout"
-    PATH="$PATH:/opt/onbld/bin:/usr/rational/local/bin:/usr/atria/bin/"
+    #PATH="$PATH:/opt/onbld/bin:/usr/rational/local/bin:/usr/atria/bin/"
+    pathappend /opt/onbld/bin
+    pathappend /usr/rational/local/bin
+    pathappend /usr/atria/bin/
 fi
 
 if [ "$BASH_SCREEN_SETTINGS" == "yes" ];then
@@ -570,8 +641,14 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 fi
 
-source /proj/common/tools/repo/etc/profile.d/repo.sh
-
+if [ "$BASH_DEBUG_SETTINGS" == "yes" ];then echo "Setting ORG_SETTINGS=$BASH_ORG_SETTINGS ........"; fi
+if [ "$BASH_ORG_SETTINGS" == "brcd" ];then
+source ~/.bashrc_custom_profile_user_brcd
+elif [ "$BASH_ORG_SETTINGS" == "pn" ];then
+source ~/.bashrc_custom_profile_user_pn
+elif [ "$BASH_ORG_SETTINGS" == "fnc" ];then
+source ~/.bashrc_custom_profile_user_fnc
+fi
 
 function h_tmux()
 {
@@ -607,6 +684,21 @@ function h_tmux()
     echo " Prefix C-v   - paste"
     echo " Prefix PgUp  - scroll mode"
     echo "====================================================="
+cat<<-EOF
+    Copy and Paste in Tmux:
+    -----------------------
+        Enter copy mode: <prefix>+[
+        Start copy: <Space>
+        Copy text: press UP or Down Key
+        End copy : <Enter>
+        Paste text: <prefix>+]
+        If you wnat to save : <prefix>+: then : save-buffer ~/out_file
+    Multiple Pane Synchronization (command on multiple screen)
+    ----------------------------------------------------------
+        <prefix> : then :setw synchronize-panes
+        Note: Thos toggles the mode so same command to come out
+
+EOF
 }
 
 function h_setup(){

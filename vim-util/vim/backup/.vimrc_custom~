@@ -712,19 +712,7 @@ set nolist
 			"shortcut keys in .vimrc for all
 			"Help document for all
 
-"enable pathogen plugin manager
-execute pathogen#infect()
-"enable signify plugin for git and hg
-let g:signify_vcs_list = [ 'git', 'hg' ]
-"Toggle TagList
-nnoremap <F11> <ESC>:TlistToggle<CR>
-" Only works if you only diff with vimdiff (and not fugitive...)
-if &diff
-    "go to next diff
-    map <F9> ]c
-    "put the diff
-    map <F10> dp
-endif
+
 source ~/.vimrc_custom_user
 
 

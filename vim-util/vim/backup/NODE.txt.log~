@@ -1,0 +1,284 @@
+[rrout@cinscplp138 ~/noVNC/wetty (master=)]
+$ curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.1/install.sh | bash
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  7766  100  7766    0     0  15995      0 --:--:-- --:--:-- --:--:-- 16012
+=> Downloading nvm from git to '/home/rrout/.nvm'
+=> Cloning into '/home/rrout/.nvm'...
+remote: Enumerating objects: 2, done.
+remote: Counting objects: 100% (2/2), done.
+remote: Compressing objects: 100% (2/2), done.
+remote: Total 7495 (delta 0), reused 1 (delta 0), pack-reused 7493
+Receiving objects: 100% (7495/7495), 2.41 MiB | 0 bytes/s, done.
+Resolving deltas: 100% (4737/4737), done.
+Checking out files: 100% (262/262), done.
+* (detached from v0.31.1)
+  master
+
+=> Appending source string to /home/rrout/.bashrc
+=> You currently have modules installed globally with `npm`. These will no
+=> longer be linked to the active version of Node when you install a new node
+=> with `nvm`; and they may (depending on how you construct your `$PATH`)
+=> override the binaries of modules installed with `nvm`:
+
+/opt/rh/rh-nodejs6/root/usr/lib
+├── abbrev@1.0.9
+├── ansi-regex@2.0.0
+├── ansi-styles@2.2.1
+├── ansicolors@0.3.2
+├── ansistyles@0.1.3
+├── aproba@1.0.4
+├── archy@1.0.0
+├── are-we-there-yet@1.1.2
+├── array-index@1.0.0
+├── asap@2.0.5
+├── asn1@0.2.3
+├── assert-plus@1.0.0
+├── asynckit@0.4.0
+├── aws-sign2@0.6.0
+├── aws4@1.4.1
+├── balanced-match@0.4.2
+├── bl@1.1.2
+├── block-stream@0.0.8
+├── boom@2.10.1
+├── brace-expansion@1.1.5
+├── buffer-shims@1.0.0
+├── builtin-modules@1.1.1
+├── builtins@1.0.2
+├── caseless@0.11.0
+├── chalk@1.1.3
+├── chownr@1.0.1
+├── clone@1.0.2
+├── cmd-shim@2.0.2
+├── code-point-at@1.0.0
+├── columnify@1.5.4
+├── combined-stream@1.0.5
+├── commander@2.9.0
+├── concat-map@0.0.1
+├── concat-stream@1.5.2
+├── config-chain@1.1.9
+├── console-control-strings@1.1.0
+├── core-util-is@1.0.2
+├── cryptiles@2.0.5
+├── d@1.0.0
+├── dashdash@1.13.1
+├── debug@2.2.0
+├── debuglog@1.0.1
+├── defaults@1.0.3
+├── delayed-stream@1.0.0
+├── delegates@1.0.0
+├── dezalgo@1.0.3
+├── ecc-jsbn@0.1.1
+├── editor@1.0.0
+├── es5-ext@0.10.12
+├── es6-iterator@2.0.0
+├── es6-symbol@3.1.0
+├── escape-string-regexp@1.0.5
+├── extend@3.0.0
+├── extsprintf@1.3.0
+├── forever-agent@0.6.1
+├── form-data@2.0.0
+├── fs-vacuum@1.2.9
+├── fs-write-stream-atomic@1.0.8
+├── fs.realpath@1.0.0
+├── fstream@1.0.10
+├── fstream-ignore@1.0.5
+├── fstream-npm@1.2.0
+├── gauge@2.6.0
+├── generate-function@2.0.0
+├── generate-object-property@1.2.0
+├── getpass@0.1.6
+├── glob@7.1.0
+├── graceful-readlink@1.0.1
+├── har-validator@2.0.3
+├── has-ansi@2.0.0
+├── has-color@0.1.7
+├── has-flag@1.0.0
+├── has-unicode@2.0.1
+├── hawk@3.1.3
+├── hoek@2.16.3
+├── hosted-git-info@2.1.5
+├── http-signature@1.1.1
+├── iferr@0.1.5
+├── imurmurhash@0.1.4
+├── inflight@1.0.5
+├── inherits@2.0.0 -> /opt/rh/rh-nodejs6/root/usr/lib/node_modules/inherits
+├── ini@1.3.4
+├── init-package-json@1.9.4
+├── is-builtin-module@1.0.0
+├── is-fullwidth-code-point@1.0.0
+├── is-my-json-valid@2.13.1
+├── is-property@1.0.2
+├── is-typedarray@1.0.0
+├── isarray@1.0.0
+├── isexe@1.1.2
+├── isstream@0.1.2
+├── jju@1.3.0
+├── jodid25519@1.0.2
+├── jsbn@0.1.0
+├── json-parse-helpfulerror@1.0.3
+├── json-schema@0.2.2
+├── json-stringify-safe@5.0.1
+├── jsonpointer@2.0.0
+├── jsprim@1.2.2
+├── lockfile@1.0.1
+├── lodash._baseindexof@3.1.0
+├── lodash._baseuniq@4.6.0
+├── lodash._bindcallback@3.0.1
+├── lodash._cacheindexof@3.0.2
+├── lodash._createcache@3.1.2
+├── lodash._createset@4.0.3
+├── lodash._getnative@3.9.1
+├── lodash._root@3.0.1
+├── lodash.clonedeep@4.5.0
+├── lodash.restparam@3.6.1
+├── lodash.union@4.6.0
+├── lodash.uniq@4.5.0
+├── lodash.without@4.4.0
+├── mime-db@1.25.0
+├── mime-types@2.1.13
+├── minimatch@3.0.2
+├── minimist@0.0.8
+├── mkdirp@0.5.1
+├── ms@0.7.1
+├── mute-stream@0.0.5
+├── node-gyp@3.4.0
+├── node-uuid@1.4.7
+├── nopt@3.0.6
+├── normalize-git-url@3.0.2
+├── normalize-package-data@2.3.5
+├── npm-cache-filename@1.0.2
+├── npm-install-checks@3.0.0
+├── npm-package-arg@4.2.0
+├── npm-registry-client@7.2.1
+├── npm-user-validate@0.1.4
+├── number-is-nan@1.0.0
+├── oauth-sign@0.8.1
+├── object-assign@4.1.0
+├── once@1.4.0
+├── opener@1.4.2
+├── os-homedir@1.0.1
+├── os-tmpdir@1.0.1
+├── osenv@0.1.3
+├── path-array@1.0.1
+├── path-is-absolute@1.0.0
+├── path-is-inside@1.0.1
+├── pinkie@2.0.4
+├── pinkie-promise@2.0.0
+├── process-nextick-args@1.0.7
+├── promzard@0.3.0
+├── proto-list@1.2.4
+├── qs@6.2.3
+├── read@1.0.7
+├── read-cmd-shim@1.0.1
+├── read-installed@4.0.3
+├── read-package-json@2.0.4
+├── read-package-tree@5.1.5
+├── readable-stream@2.1.4
+├── readdir-scoped-modules@1.0.2
+├── realize-package-specifier@3.0.3
+├── request@2.75.0
+├── retry@0.10.1
+├── rimraf@2.5.2
+├── semver@5.3.0
+├── set-blocking@2.0.0
+├── sha@2.0.1
+├── signal-exit@3.0.0
+├── slide@1.1.6
+├── sntp@1.0.9
+├── sorted-object@2.0.0
+├── spdx-correct@1.0.2
+├── spdx-exceptions@1.0.4
+├── spdx-expression-parse@1.0.2
+├── spdx-license-ids@1.2.0
+├── sshpk@1.9.2
+├── string-width@1.0.1
+├── string_decoder@0.10.31
+├── stringstream@0.0.5
+├── strip-ansi@3.0.1
+├── supports-color@3.1.1
+├── tar@2.2.1
+├── text-table@0.2.0
+├── tough-cookie@2.3.3
+├── tunnel-agent@0.4.3
+├── tweetnacl@0.14.3
+├── typedarray@0.0.6
+├── uid-number@0.0.6
+├── umask@1.1.0
+├── unique-filename@1.1.0
+├── unique-slug@2.0.0
+├── unpipe@1.0.0
+├── util-deprecate@1.0.1
+├── util-extend@1.0.3
+├── validate-npm-package-license@3.0.1
+├── validate-npm-package-name@2.2.2
+├── verror@1.8.1
+├── wcwidth@1.0.0
+├── which@1.2.10
+├── wide-align@1.1.0
+├── wrappy@1.0.2
+├── write-file-atomic@1.1.4
+└── xtend@4.0.0
+
+=> If you wish to uninstall them at a later point (or re-install them under your
+=> `nvm` Nodes), you can remove them from the system Node as follows:
+
+     $ nvm use system
+     $ npm uninstall -g a_module
+
+=> Close and reopen your terminal to start using nvm
+
+$ nvm -h
+
+Node Version Manager
+
+Note: <version> refers to any version-like string nvm understands. This includes:
+  - full or partial version numbers, starting with an optional "v" (0.10, v0.1.2, v1)
+  - default (built-in) aliases: node, stable, unstable, iojs, system
+  - custom aliases you define with `nvm alias foo`
+
+Usage:
+  nvm --help                                Show this message
+  nvm --version                             Print out the latest released version of nvm
+  nvm install [-s] <version>                Download and install a <version>, [-s] from source. Uses .nvmrc if available
+    --reinstall-packages-from=<version>     When installing, reinstall packages installed in <node|iojs|node version number>
+  nvm uninstall <version>                   Uninstall a version
+  nvm use [--silent] <version>              Modify PATH to use <version>. Uses .nvmrc if available
+  nvm exec [--silent] <version> [<command>] Run <command> on <version>. Uses .nvmrc if available
+  nvm run [--silent] <version> [<args>]     Run `node` on <version> with <args> as arguments. Uses .nvmrc if available
+  nvm current                               Display currently activated version
+  nvm ls                                    List installed versions
+  nvm ls <version>                          List versions matching a given description
+  nvm ls-remote                             List remote versions available for install
+  nvm version <version>                     Resolve the given description to a single local version
+  nvm version-remote <version>              Resolve the given description to a single remote version
+  nvm deactivate                            Undo effects of `nvm` on current shell
+  nvm alias [<pattern>]                     Show all aliases beginning with <pattern>
+  nvm alias <name> <version>                Set an alias named <name> pointing to <version>
+  nvm unalias <name>                        Deletes the alias named <name>
+  nvm reinstall-packages <version>          Reinstall global `npm` packages contained in <version> to current version
+  nvm unload                                Unload `nvm` from shell
+  nvm which [<version>]                     Display path to installed node version. Uses .nvmrc if available
+
+Example:
+  nvm install v0.10.32                  Install a specific version number
+  nvm use 0.10                          Use the latest available 0.10.x release
+  nvm run 0.10.32 app.js                Run app.js using node v0.10.32
+  nvm exec 0.10.32 node app.js          Run `node app.js` with the PATH pointing to node v0.10.32
+  nvm alias default 0.10.32             Set default node version on a shell
+
+Note:
+  to remove, delete, or uninstall nvm - just remove the `$NVM_DIR` folder (usually `~/.nvm`)
+
+    https://github.com/nvm-sh/nvm#install-script
+
+https://github.com/nvm-sh/nvm#install-script
+
+https://stackoverflow.com/questions/10081293/install-npm-into-home-directory-with-distribution-nodejs-package-ubuntu
+
+https://docs.npmjs.com/resolving-eacces-permissions-errors-when-installing-packages-globally
+
+https://github.com/krishnasrinivas/wetty
+http://cinscplp138:6080/vnc.html?host=cinscplp138&port=6080
+
+

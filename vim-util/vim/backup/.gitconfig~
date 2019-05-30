@@ -1,0 +1,33 @@
+[user]
+	email = rashmiranjan.rout@us.fujitsu.com
+	name = Rashmi Ranjan Rout
+[color]
+	ui = auto
+	interactive = auto
+
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+
+[color "diff"]
+    meta = blue bold    #yellow bold
+    frag = magneta      #magenta bold
+    old = red           #red bold
+    new = green         #green bold
+
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = red
+[diff]
+	tool = vimdiff
+[merge]
+	tool = vimdiff
+	log = true
+[difftool]
+	prompt = true
+[core]
+	editor = vim
+[push]
+	default = simple

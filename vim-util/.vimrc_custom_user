@@ -1,3 +1,7 @@
+
+set ic
+set wrap
+
 execute pathogen#infect()
 "enable pathogen plugin manager
 execute pathogen#infect()

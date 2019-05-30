@@ -53,19 +53,22 @@ set tags+=~/.vim/tags/qt4
 " goto definition with F12
 "map <F12> <C-]>
 " in diff mode we use the spell check keys for merging
-if &diff
+"if &diff
 "diff settings
-map <M-Down> ]c
-map <M-Up> [c
-map <M-Left> do
-map <M-Right> dp
-map <F9> :new<CR>:read !svn diff<CR>:set syntax=diff buftype=nofile<CR>gg
-else
+"map <M-Down> ]c
+"map <M-Up> [c
+"map <M-Left> do
+"map <M-Right> dp
+"map <F9> :new<CR>:read !svn diff<CR>:set syntax=diff buftype=nofile<CR>gg
+"else
 " spell settings
 ":setlocal spell spelllang=en
 " set the spellfile - folders must exist
 "set spellfile=~/.vim/spellfile.add
-map <M-Down> ]s
-map <M-Up> [s
-endif
+"map <M-Down> ]s
+"map <M-Up> [s
+"endif
 source ~/.vimrc_custom
+set runtimepath+=~/reditor/vim
+"set runtimepath+=~/reditor/vim/.vim
+source ~/reditor/vim/reditor_vim_config.vim
