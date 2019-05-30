@@ -3,30 +3,28 @@
 # If not running interactively, don't do anything
 if [[ $- != *i* ]]; then return; fi
 
-export PATH="$PATH:~/utils/bin:~/utils/tools"
-
 # User specific environment and startup programs
 # Set ENV Settings Variable
 BASH_TMUXALIAS_SETTINGS=yes
 BASH_USERALIAS_SETTINGS=yes
-BASH_LOCALUSERPATH_SETTINGS=yes 
+BASH_LOCALUSERPATH_SETTINGS=yes
 BASH_USERBASH_SETTINGS=yes
 BASH_HISTORY_SETTINGS=yes
 BASH_EDITOR_SETTINGS=emcas
-BASH_SPACE_SETTINGS=yes 
-BASH_AUTO_SETTINGS=yes 
-BASH_PERMISSION_SETTINGS=yes 
-BASH_LINEWRAP_SETTINGS=yes 
+BASH_SPACE_SETTINGS=yes
+BASH_AUTO_SETTINGS=no
+BASH_PERMISSION_SETTINGS=yes
+BASH_LINEWRAP_SETTINGS=yes
 BASH_STTY_SETTINGS=yes
 BASH_HIST_SETTINGS=no
-BASH_COLOR_SETTINGS=yes  
-BASH_LSCOLOR_SETTINGS=yes 
+BASH_COLOR_SETTINGS=yes
+BASH_LSCOLOR_SETTINGS=yes
 BASH_COMPLETION_SETTINGS=yes
 BASH_PYTHONPATH_SETTINGS=yes
-BASH_TOUCHFILE_SETTINGS=yes 
+BASH_TOUCHFILE_SETTINGS=yes
 BASH_GTAGS_SETTINGS=yes
-BASH_CTAGS_SETTINGS=yes  
-BASH_SCREEN_SETTINGS=yes 
+BASH_CTAGS_SETTINGS=yes
+BASH_SCREEN_SETTINGS=no
 BASH_LANG_SETTINGS=yes
 BASH_CVS_SETTINGS=git
 BASH_KG_SETTINGS=nokg
@@ -46,12 +44,12 @@ function VGtags()
 		return
 	fi
 	file=$2
-	if [[ $1 = "p" ]] 
+	if [[ $1 = "p" ]]
 	then
 		declare -a filename_lineno=($(echo $2 | tr "[: ]" " "))
 		file="${filename_lineno[0]}"
 	fi
-	
+
 	:> ~/.vim/tmp/vfiles.txt
 	vim -c ":call Gtags_$1(\"$file\")"
 	. ~/.vim/tmp/vfiles.txt
@@ -85,10 +83,10 @@ function vk()
 	vim $filename  $lineno
 }
 
-_x() 
+_x()
 {
     local cur prev opts
-	if [[ $COMP_CWORD -ne 1 ]]; 
+	if [[ $COMP_CWORD -ne 1 ]];
 	then
 		return 0
 	fi
@@ -106,10 +104,10 @@ _x()
 complete -F _x x
 complete -F _x getx
 
-_r() 
+_r()
 {
     local cur prev opts
-	if [[ $COMP_CWORD -ne 1 ]]; 
+	if [[ $COMP_CWORD -ne 1 ]];
 	then
 		return 0
 	fi
@@ -128,10 +126,10 @@ complete -F _r r
 complete -F _r getr
 
 
-_p() 
+_p()
 {
     local cur prev opts
-	if [[ $COMP_CWORD -ne 1 ]]; 
+	if [[ $COMP_CWORD -ne 1 ]];
 	then
 		return 0
 	fi
@@ -150,10 +148,10 @@ complete -F _p p
 complete -F _p getp
 
 
-_s() 
+_s()
 {
     local cur prev opts
-	if [[ $COMP_CWORD -ne 1 ]]; 
+	if [[ $COMP_CWORD -ne 1 ]];
 	then
 		return 0
 	fi
@@ -173,10 +171,10 @@ complete -F _s gets
 
 
 
-_g() 
+_g()
 {
     local cur prev opts
-	if [[ $COMP_CWORD -ne 1 ]]; 
+	if [[ $COMP_CWORD -ne 1 ]];
 	then
 		return 0
 	fi
@@ -194,14 +192,14 @@ _g()
 complete -F _g g
 complete -F _g getg
 
-cd(){
+user_cd(){
     dir=$1;
     to_dir="${!dir}"
 	vob_dir="${PWD%/mucho*}/${!dir}"
 	#echo "${to_dir}, ${vob_dir},  ${dir}, ${!dir}"
 
     if [[ $# -eq 0 ]]; then
-        builtin cd $HOME;    
+        builtin cd $HOME;
     elif [[ "$dir" == "-" ]]; then
         builtin cd -
     elif [[ -d ${dir} ]]; then
@@ -248,7 +246,7 @@ function chgrepi(){
 }
 
 
-_kals() 
+_kals()
 {
     local cur prev opts
     COMPREPLY=()
@@ -263,7 +261,7 @@ _kals()
 }
 complete -F _kals kals
 
-_expand() 
+_expand()
 {
     local cur prev opts
     COMPREPLY=()
@@ -276,22 +274,26 @@ _expand()
 }
 #complete -F _expand ls
 
-function ps1() 
+function ps1()
 {
-    export PS1="[\`pwd\`]" 
+    export PS1="[\`pwd\`]"
 }
 
 rm -rf  ~/.vim/tmp/*
+rm -rf  ~/tmuxlog/*
 
 
 function cwd()
 {
 	return "$(pwd)"
 }
-echo "${PWD}" > ${HOME}/.screen_pwd_${STY#*.}
 
+clear_bash_hash()
+{
+    hash -r
+}
 
 #. ~/.bashrc_custom_profile_user_pn
-. ~/.bashrc_custom_profile_user_fnc
+#. ~/.bashrc_custom_profile_user_fnc
 . ~/.bashrc_custom_profile_user
 

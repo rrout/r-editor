@@ -1,6 +1,5 @@
 
 
-
 function! DirTreeDiff (dir1, dir2, ...)
     autocmd FileChangedShell * echon ""
 
@@ -16,8 +15,8 @@ function! DirTreeDiff (dir1, dir2, ...)
 
     silent execute "! diff -rqlp ". diffopts ." ". d1 ." ". d2 ." | sort >/tmp/diff.txt"
     silent execute "! vimdiff  "
-                \. " <( echo ".d1.";cat /tmp/diff.txt | sed -e :a -e '/Only in ".d1."/{s/Only in ".d1."\\(.*\\): \\(.*\\)/\\1\\/\\2/g;n;ba}'  -e '/Files/{s
-                \. " <( echo ".d2.";cat /tmp/diff.txt | sed -e :a -e '/Only in ".d2."/{s/Only in ".d2."\\(.*\\): \\(.*\\)/\\1\\/\\2/g;n;ba}'  -e '/Files/{s
+                \. " <( echo ".d1.";cat /tmp/diff.txt | sed -e :a -e '/Only in ".d1."/{s/Only in ".d1."\\(.*\\): \\(.*\\)/\\1\\/\\2/g;n;ba}'  -e '/Files/{s/Files ".d1."\\(.*\\) and.*/\\1/g;n;ba;}' -e 's/Only in ".d2."\\(.*\\).*: /\\/\\1\\/\\//g;'  )"
+                \. " <( echo ".d2.";cat /tmp/diff.txt | sed -e :a -e '/Only in ".d2."/{s/Only in ".d2."\\(.*\\): \\(.*\\)/\\1\\/\\2/g;n;ba}'  -e '/Files/{s/Files ".d1."\\(.*\\) and ".d2."\\(.*\\) differ/\\2/g;n;ba;}' -e 's/.*".d1."\\(.*\\): \\(.*\\)/\\/\\1\\/\\2/g;'  )"
 
 
         if v:version > 700

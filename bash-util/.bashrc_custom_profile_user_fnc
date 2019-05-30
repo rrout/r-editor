@@ -33,5 +33,5 @@ WHITE="\[\033[1;37m\]"
 GITPS="$BGREEN[\u@\h ${BBLUE}\w${GREEN}"'$(__git_ps1 " (%s)")'"${BGREEN}]${NORMAL}\\n$ "
 PS1=$GITPS
 
-
+source /proj/common/tools/repo/etc/profile.d/repo.sh
 
